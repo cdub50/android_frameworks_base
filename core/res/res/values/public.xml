@@ -2055,4 +2055,6 @@
 
   <java-symbol type="bool" name="config_forceDisableHardwareKeyboard" />
 
+  <!-- Stylus gestures -->
+  <java-symbol type="bool" name="config_stylusGestures" />
 </resources>
