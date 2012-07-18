@@ -73,6 +73,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -128,6 +129,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected int mLayoutDirection;
     private Locale mLocale;
 
+    protected FrameLayout mStatusBarContainer;
+
     // UI-specific methods
 
     /**
@@ -143,6 +146,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected Display mDisplay;
 
     private boolean mDeviceProvisioned = false;
+
+    private boolean mShowNotificationCounts;
 
     public IStatusBarService getStatusBarService() {
         return mBarService;
@@ -211,6 +216,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         mLocale = mContext.getResources().getConfiguration().locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
+
+        mShowNotificationCounts = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_NOTIF_COUNT, 0) == 1;
+
+        mStatusBarContainer = new FrameLayout(mContext);
 
         // Connect in to the status bar manager service
         StatusBarIconList iconList = new StatusBarIconList();
