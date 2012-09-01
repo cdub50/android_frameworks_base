@@ -42,7 +42,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.server.search.SearchManagerService;
 import android.service.dreams.DreamService;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -90,7 +89,6 @@ class ServerThread extends Thread {
 
     public static final String FAST_CHARGE_DIR = "/sys/kernel/fast_charge";
     public static final String FAST_CHARGE_FILE = "force_fast_charge";
-
     ContentResolver mContentResolver;
 
     void reportWtf(String msg, Throwable e) {
@@ -634,7 +632,8 @@ class ServerThread extends Thread {
             }
 
             if (context.getResources().getBoolean(
-                        com.android.internal.R.bool.config_enableWallpaperService)) {
+                        com.android.internal.R.bool.config_enableWallpaperService) &&
+                        !"0".equals(SystemProperties.get("persist.sys.wallpaperservice", "1"))) {
                 try {
                     Slog.i(TAG, "Wallpaper Service");
                     if (!headless) {
@@ -792,8 +791,8 @@ class ServerThread extends Thread {
             }
 
             try {
-                Slog.i(TAG, "IdleMaintenanceService");
-                new IdleMaintenanceService(context, battery);
+                Slog.i(TAG, "AssetRedirectionManager Service");
+                ServiceManager.addService("assetredirection", new AssetRedirectionManagerService(context));
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting AssetRedirectionManager Service", e);
             }
@@ -809,10 +808,10 @@ class ServerThread extends Thread {
             }
 
             try {
-                Slog.i(TAG, "AssetRedirectionManager Service");
-                ServiceManager.addService("assetredirection", new AssetRedirectionManagerService(context));
+                Slog.i(TAG, "IdleMaintenanceService");
+                new IdleMaintenanceService(context, battery);
             } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting AssetRedirectionManager Service", e);
+                reportWtf("starting IdleMaintenanceService", e);
             }
         }
 
@@ -1091,7 +1090,6 @@ class ServerThread extends Thread {
     }
 
     static final void startSystemUi(Context context) {
-
         // restore fast charge state before starting systemui
         boolean enabled = Settings.System.getInt(context.getContentResolver(), Settings.System.FCHARGE_ENABLED, 0) == 1;
             try {
@@ -1109,7 +1107,6 @@ class ServerThread extends Thread {
                     Settings.System.putInt(context.getContentResolver(),
                          Settings.System.FCHARGE_ENABLED, 0);
                 }
-
         Intent intent = new Intent();
         intent.setComponent(new ComponentName("com.android.systemui",
                     "com.android.systemui.SystemUIService"));
