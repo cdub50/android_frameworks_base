@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2006 The Android Open Source Project
+ * This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -2584,20 +2585,17 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.QUICK_CLOCK";
 
     /**
-     * Broadcast Action: This is broadcast when a user action should request the
-     * brightness setting dialog.
+     * Broadcast Action: Indicate that unrecoverable error happened during app launch.
+     * Could indicate that curently applied theme is malicious.
      * @hide
      */
-    public static final String ACTION_SHOW_BRIGHTNESS_DIALOG =
-            "android.intent.action.SHOW_BRIGHTNESS_DIALOG";
+    public static final String ACTION_APP_LAUNCH_FAILURE = "com.tmobile.intent.action.APP_LAUNCH_FAILURE";
 
     /**
-     * Broadcast Action:  A global button was pressed.  Includes a single
-     * extra field, {@link #EXTRA_KEY_EVENT}, containing the key event that
-     * caused the broadcast.
+     * Broadcast Action: Request to reset the unrecoverable errors count to 0.
      * @hide
      */
-    public static final String ACTION_GLOBAL_BUTTON = "android.intent.action.GLOBAL_BUTTON";
+    public static final String ACTION_APP_LAUNCH_FAILURE_RESET = "com.tmobile.intent.action.APP_LAUNCH_FAILURE_RESET";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -2732,6 +2730,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String CATEGORY_FRAMEWORK_INSTRUMENTATION_TEST =
             "android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST";
+
     /**
      * An activity to run when device is inserted into a car dock.
      * Used with {@link #ACTION_MAIN} to launch an activity.  For more
@@ -2767,6 +2766,14 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_CAR_MODE = "android.intent.category.CAR_MODE";
+
+    /**
+     * Used to indicate that a theme package has been installed or un-installed.
+     *
+     * @hide
+     */
+    public static final String CATEGORY_THEME_PACKAGE_INSTALLED_STATE_CHANGE =
+            "com.tmobile.intent.category.THEME_PACKAGE_INSTALL_STATE_CHANGE";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
