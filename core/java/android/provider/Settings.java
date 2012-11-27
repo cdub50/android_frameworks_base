@@ -4745,19 +4745,17 @@ public final class Settings {
         public static final String SCREENSAVER_DEFAULT_COMPONENT = "screensaver_default_component";
 
         /**
-         * Name of a package that the current user has explicitly allowed to see all of that
-         * user's notifications.
-         *
-         * @hide
-         */
-        public static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
-
-        /**
          * Whether or not to enable the dial pad autocomplete functionality.
          *
          * @hide
          */
         public static final String DIALPAD_AUTOCOMPLETE = "dialpad_autocomplete";
+
+        /**
+         * Whether to allow killing of the foreground app by long-pressing the Back button
+         * @hide
+         */
+        public static final String KILL_APP_LONGPRESS_BACK = "kill_app_longpress_back";
 
         /**
          * This are the settings to be backed up.
@@ -5025,12 +5023,6 @@ public final class Settings {
          * @hide
          */
         public static final String POWER_SOUNDS_ENABLED = "power_sounds_enabled";
-
-        /**
-         * Whether to allow killing of the foreground app by long-pressing the Back button
-         * @hide
-         */
-        public static final String KILL_APP_LONGPRESS_BACK = "kill_app_longpress_back";
 
         /**
          * URI for the "wireless charging started" sound.
