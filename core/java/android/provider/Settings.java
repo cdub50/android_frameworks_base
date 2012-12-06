@@ -3435,6 +3435,16 @@ public final class Settings {
         };
 
         /**
+         * @hide
+         */
+        public static final String LOCKSCREEN_CAMERA_WIDGET = "lockscreen_camera_widget";
+
+        /**
+         * @hide
+         */
+        public static final String LOCKSCREEN_ALL_WIDGETS = "lockscreen_all_widgets";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
