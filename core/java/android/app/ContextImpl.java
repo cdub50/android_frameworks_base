@@ -530,12 +530,11 @@ class ContextImpl extends Context {
                 return new UserManager(ctx, service);
             }});
 
-        registerService(APP_OPS_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(APP_OPS_SERVICE);
-                IAppOpsService service = IAppOpsService.Stub.asInterface(b);
-                return new AppOpsManager(ctx, service);
-            }});
+        registerService(PROFILE_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    final Context outerContext = ctx.getOuterContext();
+                    return new ProfileManager (outerContext, ctx.mMainThread.getHandler());
+                }});
     }
 
     static ContextImpl getImpl(Context context) {
