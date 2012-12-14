@@ -1272,10 +1272,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 feature);
                     }
                     if (network.reconnect()) {
-                        if (DBG) log("startUsingNetworkFeature X: return APN_REQUEST_STARTED");
                         return PhoneConstants.APN_REQUEST_STARTED;
                     } else {
-                        if (DBG) log("startUsingNetworkFeature X: return APN_REQUEST_FAILED");
                         return PhoneConstants.APN_REQUEST_FAILED;
                     }
                 } else {
