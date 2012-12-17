@@ -765,6 +765,7 @@ public class WifiStateMachine extends StateMachine {
         if (enable) {
             sendMessage(CMD_START_SUPPLICANT);
         } else {
+            mWifiConfigStore.setStateFromAutoConnectAllNetworks();
             sendMessage(CMD_STOP_SUPPLICANT);
         }
     }
