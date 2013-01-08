@@ -388,6 +388,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
         checkAppWidgetConsistency();
         mSwitchPageRunnable.run();
+
         // This needs to be called after the pages are all added.
         mViewStateManager.showUsabilityHints();
 
