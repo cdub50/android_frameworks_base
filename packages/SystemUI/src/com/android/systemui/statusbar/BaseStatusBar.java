@@ -556,10 +556,17 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Bitmap first = firstTask.getThumbnail();
                 final Resources res = mContext.getResources();
 
+                boolean largeThumbs = Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.LARGE_RECENT_THUMBS, 0) == 1;
+
                 float thumbWidth = res
-                        .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_width);
+                        .getDimensionPixelSize(largeThumbs ?
+                        R.dimen.status_bar_recents_thumbnail_width_large :
+                        R.dimen.status_bar_recents_thumbnail_width);
                 float thumbHeight = res
-                        .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_height);
+                        .getDimensionPixelSize(largeThumbs ?
+                        R.dimen.status_bar_recents_thumbnail_height_large :
+                        R.dimen.status_bar_recents_thumbnail_height);
                 if (first == null) {
                     throw new RuntimeException("Recents thumbnail is null");
                 }
@@ -1224,5 +1231,53 @@ public abstract class BaseStatusBar extends SystemUI implements
     public boolean inKeyguardRestrictedInputMode() {
         KeyguardManager km = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         return km.inKeyguardRestrictedInputMode();
+    }
+
+    public int getExpandedDesktopMode() {
+        ContentResolver resolver = mContext.getContentResolver();
+        boolean expanded = Settings.System.getIntForUser(resolver,
+                Settings.System.EXPANDED_DESKTOP_STATE, 0, UserHandle.USER_CURRENT) == 1;
+        if (expanded) {
+            return Settings.System.getIntForUser(resolver,
+                    Settings.System.EXPANDED_DESKTOP_STYLE, 0, UserHandle.USER_CURRENT);
+        }
+        return 0;
+    }
+
+    public void addNavigationBarCallback(NavigationBarCallback callback) {
+        mNavigationCallbacks.add(callback);
+    }
+
+    protected void propagateNavigationIconHints(int hints) {
+        for (NavigationBarCallback callback : mNavigationCallbacks) {
+            callback.setNavigationIconHints(hints);
+        }
+    }
+
+    protected void propagateMenuVisibility(boolean showMenu) {
+        for (NavigationBarCallback callback : mNavigationCallbacks) {
+            callback.setMenuVisibility(showMenu);
+        }
+    }
+
+    protected void propagateDisabledFlags(int disabledFlags) {
+        for (NavigationBarCallback callback : mNavigationCallbacks) {
+            callback.setDisabledFlags(disabledFlags);
+        }
+    }
+
+    private class SettingsObserver extends ContentObserver {
+        private Handler mHandler;
+
+        SettingsObserver(Handler handler) {
+            super(handler);
+            mHandler = handler;
+        }
+
+        void observe(Context context) {
+            ContentResolver resolver = context.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LARGE_RECENT_THUMBS), false, this);
+        }
     }
 }

@@ -98,6 +98,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private ArrayList<TaskDescription> mRecentTaskDescriptions;
     private TaskDescriptionAdapter mListAdapter;
     private int mThumbnailWidth;
+    private int mThumbnailHeight;
     private boolean mFitThumbnailToXY;
     private int mRecentItemLayoutId;
     private boolean mHighEndGfx;
@@ -170,6 +171,11 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             holder.thumbnailView = convertView.findViewById(R.id.app_thumbnail);
             holder.thumbnailViewImage =
                     (ImageView) convertView.findViewById(R.id.app_thumbnail_image);
+            ViewGroup.LayoutParams lp =
+                    (ViewGroup.LayoutParams) holder.thumbnailViewImage.getLayoutParams();
+            lp.height = mThumbnailHeight;
+            lp.width = mThumbnailWidth;
+            holder.thumbnailViewImage.setLayoutParams(lp);
             // If we set the default thumbnail now, we avoid an onLayout when we update
             // the thumbnail later (if they both have the same dimensions)
             updateThumbnail(holder, mRecentTasksLoader.getDefaultThumbnail(), false, false);
@@ -464,7 +470,14 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     public void updateValuesFromResources() {
         final Resources res = mContext.getResources();
-        mThumbnailWidth = Math.round(res.getDimension(R.dimen.status_bar_recents_thumbnail_width));
+        boolean largeThumbs = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.LARGE_RECENT_THUMBS, 0) == 1;
+        mThumbnailWidth = Math.round(res.getDimension(largeThumbs ?
+                R.dimen.status_bar_recents_thumbnail_width_large :
+                R.dimen.status_bar_recents_thumbnail_width));
+        mThumbnailHeight = Math.round(res.getDimension(largeThumbs ?
+                R.dimen.status_bar_recents_thumbnail_height_large :
+                R.dimen.status_bar_recents_thumbnail_height));
         mFitThumbnailToXY = res.getBoolean(R.bool.config_recents_thumbnail_image_fits_to_xy);
     }
 
