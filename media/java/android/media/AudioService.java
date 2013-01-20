@@ -64,6 +64,7 @@ import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.System;
+import android.provider.Settings.SettingNotFoundException;
 import android.speech.RecognizerIntent;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -186,6 +187,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     /** @see VolumeStreamState */
     private VolumeStreamState[] mStreamStates;
     private SettingsObserver mSettingsObserver;
+    //nodelay in a2dp
+    private boolean noDelayInATwoDP = Resources.getSystem().getBoolean(com.android.internal.R.bool.config_noDelayInATwoDP);
 
     private int mMode;
     // protects mRingerMode
@@ -525,6 +528,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         // Register for device connection intent broadcasts.
         IntentFilter intentFilter =
                 new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
+        if (noDelayInATwoDP)
+            intentFilter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
         intentFilter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
         intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
         intentFilter.addAction(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG);
@@ -1940,6 +1945,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** @see AudioManager#setBluetoothA2dpOn(boolean) */
     public void setBluetoothA2dpOn(boolean on) {
+        if (!checkAudioSettingsPermission("setBluetoothA2dpOn()") && noDelayInATwoDP) {
+            return;
+        }
+
         synchronized (mBluetoothA2dpEnabledLock) {
             mBluetoothA2dpEnabled = on;
             sendMsg(mAudioHandler, MSG_SET_FORCE_BT_A2DP_USE, SENDMSG_QUEUE,
@@ -2278,6 +2287,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 deviceList = a2dp.getConnectedDevices();
                 if (deviceList.size() > 0) {
                     btDevice = deviceList.get(0);
+                    if (!noDelayInATwoDP){
                     synchronized (mConnectedDevices) {
                         int state = a2dp.getConnectionState(btDevice);
                         int delay = checkSendBecomingNoisyIntent(
@@ -2289,6 +2299,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                                 0,
                                 btDevice,
                                 delay);
+                        }
+                    } else {
+                        onSetA2dpConnectionState(btDevice, a2dp.getConnectionState(btDevice));
                     }
                 }
                 break;
@@ -2731,6 +2744,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     public int setBluetoothA2dpDeviceConnectionState(BluetoothDevice device, int state)
     {
         int delay;
+        if(!noDelayInATwoDP) {
         synchronized (mConnectedDevices) {
             delay = checkSendBecomingNoisyIntent(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                                             (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
@@ -2740,6 +2754,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     0,
                     device,
                     delay);
+        }
+    } else {
+        delay = 0;
         }
         return delay;
     }
@@ -3726,6 +3743,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     // must be called synchronized on mConnectedDevices
     private void makeA2dpDeviceUnavailableNow(String address) {
+        if (noDelayInATwoDP)
+            onSendBecomingNoisyIntent();
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE,
                 address);
@@ -3990,17 +4009,17 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     default:
                         config = AudioSystem.FORCE_NONE;
                 }
-                // Low end docks have a menu to enable or disable audio
-                // (see mDockAudioMediaEnabled)
-                if (!((dockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
-                      ((dockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) &&
-                       (mDockState == Intent.EXTRA_DOCK_STATE_LE_DESK)))) {
-                    AudioSystem.setForceUse(AudioSystem.FOR_DOCK, config);
-                }
-                mDockState = dockState;
+
+                AudioSystem.setForceUse(AudioSystem.FOR_DOCK, config);
+            } else if (action.equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED) && noDelayInATwoDP) {
+                state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
+                                           BluetoothProfile.STATE_DISCONNECTED);
+                BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+                onSetA2dpConnectionState(btDevice, state);
             } else if (action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
                 state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
-                                               BluetoothProfile.STATE_DISCONNECTED);
+                                           BluetoothProfile.STATE_DISCONNECTED);
                 device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO;
                 String address = null;
 
