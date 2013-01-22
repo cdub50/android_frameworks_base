@@ -947,7 +947,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     public List<String> getProviders(Criteria criteria, boolean enabledOnly) {
         int allowedResolutionLevel = getCallerAllowedResolutionLevel();
         ArrayList<String> out;
-        int uid = Binder.getCallingUid();;
+        int uid = Binder.getCallingUid();
         long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -1103,11 +1103,14 @@ public class LocationManagerService extends ILocationManager.Stub {
             for (UpdateRecord record : records) {
                 if (UserHandle.getUserId(record.mReceiver.mUid) == mCurrentUserId &&
                         !mBlacklist.isBlacklisted(record.mReceiver.mPackageName)) {
-                    LocationRequest locationRequest = record.mRequest;
-                    providerRequest.locationRequests.add(locationRequest);
-                    if (locationRequest.getInterval() < providerRequest.interval) {
-                        providerRequest.reportLocation = true;
-                        providerRequest.interval = locationRequest.getInterval();
+                    if (checkLocationAccess(record.mReceiver.mUid, record.mReceiver.mPackageName,
+                            record.mReceiver.mAllowedResolutionLevel)) {
+                        LocationRequest locationRequest = record.mRequest;
+                        providerRequest.locationRequests.add(locationRequest);
+                        if (locationRequest.getInterval() < providerRequest.interval) {
+                            providerRequest.reportLocation = true;
+                            providerRequest.interval = locationRequest.getInterval();
+                        }
                     }
                 }
             }

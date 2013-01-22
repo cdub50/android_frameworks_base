@@ -79,7 +79,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String LOCK_PATTERN_FILE = "gesture.key";
     private static final String LOCK_PASSWORD_FILE = "password.key";
     private static final String LOCK_GESTURE_FILE = "lock_gesture.key";
-
     private static final String LOCK_GESTURE_NAME = "lock_gesture";
 
     private final Context mContext;
@@ -226,15 +225,38 @@ public class LockSettingsService extends ILockSettings.Stub {
         return readFromDb(key, defaultValue, userId);
     }
 
+    @Override
+    public byte getLockPatternSize(int userId) {
+        try {
+            long size = getLong(Settings.Secure.LOCK_PATTERN_SIZE, -1, userId);
+            if (size > 0 && size < 128) {
+                return (byte) size;
+            }
+        } catch (RemoteException re) {
+            //Any invalid size handled below
+        }
+        return LockPatternUtils.PATTERN_SIZE_DEFAULT;
+    }
+
+    private boolean isDefaultSize(int userId) {
+        return getLockPatternSize(userId) == LockPatternUtils.PATTERN_SIZE_DEFAULT;
+    }
+
     private String getLockPatternFilename(int userId) {
+        return getLockPatternFilename(userId, isDefaultSize(userId));
+    }
+
+    private String getLockPatternFilename(int userId, boolean defaultSize) {
         String dataSystemDirectory =
                 android.os.Environment.getDataDirectory().getAbsolutePath() +
                 SYSTEM_DIRECTORY;
+        String patternFile = (defaultSize ? "" : "cm_") + LOCK_PATTERN_FILE;
+
         if (userId == 0) {
             // Leave it in the same place for user 0
-            return dataSystemDirectory + LOCK_PATTERN_FILE;
+            return dataSystemDirectory + patternFile;
         } else {
-            return  new File(Environment.getUserSystemDirectory(userId), LOCK_PATTERN_FILE)
+            return  new File(Environment.getUserSystemDirectory(userId), patternFile)
                     .getAbsolutePath();
         }
     }
@@ -288,7 +310,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public boolean haveGesture(int userId) throws RemoteException {
         // Do we need a permissions check here?
-
         return new File(getLockGestureFilename(userId)).length() > 0;
     }
 
@@ -296,7 +317,9 @@ public class LockSettingsService extends ILockSettings.Stub {
     public void setLockPattern(byte[] hash, int userId) throws RemoteException {
         checkWritePermission(userId);
 
-        writeFile(getLockPatternFilename(userId), hash);
+        boolean defaultSize = isDefaultSize(userId);
+        writeFile(getLockPatternFilename(userId,  defaultSize), hash);
+        writeFile(getLockPatternFilename(userId, !defaultSize), null);
     }
 
     @Override
@@ -526,7 +549,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         Secure.LOCK_PATTERN_ENABLED,
         Secure.LOCK_BIOMETRIC_WEAK_FLAGS,
         Secure.LOCK_PATTERN_VISIBLE,
-        Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED
+        Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED,
+        Secure.LOCK_SHOW_ERROR_PATH,
+        Secure.LOCK_DOTS_VISIBLE
     };
 
     // These are protected with a read permission
