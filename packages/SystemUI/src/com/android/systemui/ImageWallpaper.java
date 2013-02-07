@@ -626,26 +626,10 @@ public class ImageWallpaper extends WallpaperService {
             }
             
             mEglContext = createContext(mEgl, mEglDisplay, mEglConfig);
-            if (mEglContext == EGL_NO_CONTEXT) {
-                throw new RuntimeException("createContext failed " +
-                        GLUtils.getEGLErrorString(mEgl.eglGetError()));
-            }
-
-            int attribs[] = {
-                EGL_WIDTH, 1,
-                EGL_HEIGHT, 1,
-                EGL_NONE
-            };
-            EGLSurface tmpSurface = mEgl.eglCreatePbufferSurface(mEglDisplay, mEglConfig, attribs);
-            mEgl.eglMakeCurrent(mEglDisplay, tmpSurface, tmpSurface, mEglContext);
 
             int[] maxSize = new int[1];
             Rect frame = surfaceHolder.getSurfaceFrame();
             glGetIntegerv(GL_MAX_TEXTURE_SIZE, maxSize, 0);
-
-            mEgl.eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-            mEgl.eglDestroySurface(mEglDisplay, tmpSurface);
-
             if(frame.width() > maxSize[0] || frame.height() > maxSize[0]) {
                 mEgl.eglDestroyContext(mEglDisplay, mEglContext);
                 mEgl.eglTerminate(mEglDisplay);
@@ -656,6 +640,7 @@ public class ImageWallpaper extends WallpaperService {
             }
 
             mEglSurface = mEgl.eglCreateWindowSurface(mEglDisplay, mEglConfig, surfaceHolder, null);
+
             if (mEglSurface == null || mEglSurface == EGL_NO_SURFACE) {
                 int error = mEgl.eglGetError();
                 if (error == EGL_BAD_NATIVE_WINDOW || error == EGL_BAD_ALLOC) {
