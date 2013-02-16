@@ -81,7 +81,6 @@ public class DeviceStorageMonitorService extends Binder {
     private static final int DEFAULT_FREE_STORAGE_LOG_INTERVAL_IN_MINUTES = 12*60; //in minutes
     private static final long DEFAULT_DISK_FREE_CHANGE_REPORTING_THRESHOLD = 2 * 1024 * 1024; // 2MB
     private static final long DEFAULT_CHECK_INTERVAL = MONITOR_INTERVAL*60*1000;
-    private static final int DEFAULT_FULL_THRESHOLD_BYTES = 1024*1024; // 1MB
     private long mFreeMem;  // on /data/data
     private long mFreeMemAfterLastCacheClear;  // on /data/data
     private long mLastReportedFreeMem;
@@ -90,14 +89,15 @@ public class DeviceStorageMonitorService extends Binder {
     private boolean mMemFullFlag=false;
     private Context mContext;
     private Context mUiContext;
-    private ContentResolver mContentResolver;
+    private ContentResolver mResolver;
     private long mTotalMemory;  // on /data/data
     private StatFs mDataFileStats;
     private StatFs mSystemFileStats;
     private StatFs mCacheFileStats;
-    private static final String DATA_PATH = "/data/data"; // might not be the same fs as /data
-    private static final String SYSTEM_PATH = "/system";
-    private static final String CACHE_PATH = "/cache";
+    private static final File DATA_PATH = Environment.getDataDirectory();
+    private static final File SYSTEM_PATH = Environment.getRootDirectory();
+    private static final File CACHE_PATH = Environment.getDownloadCacheDirectory();
+
     private long mThreadStartTime = -1;
     private boolean mClearSucceeded = false;
     private boolean mClearingCache;
@@ -316,7 +316,7 @@ public class DeviceStorageMonitorService extends Binder {
     public DeviceStorageMonitorService(Context context) {
         mLastReportedFreeMemTime = 0;
         mContext = context;
-        mContentResolver = mContext.getContentResolver();
+        mResolver = mContext.getContentResolver();
 
         ThemeUtils.registerThemeChangeReceiver(mContext, new BroadcastReceiver() {
             @Override
