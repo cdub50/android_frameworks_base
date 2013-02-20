@@ -117,29 +117,31 @@ public final class ShutdownThread extends Thread {
             }
         }
 
-        final int longPressBehavior = context.getResources().getInteger(
-                        com.android.internal.R.integer.config_longPressOnPowerBehavior);
+        final int titleResourceId;
+        final int resourceId;
 
-        final int shutdownConfirmId =
-                mReboot ? com.android.internal.R.string.shutdown_confirm_reboot
-                        : com.android.internal.R.string.shutdown_confirm;
-        final int shutdownConfirmQuestionId =
-                mReboot ? com.android.internal.R.string.shutdown_confirm_reboot_question
-                        : com.android.internal.R.string.shutdown_confirm_question;
+        Log.d(TAG, "Notifying thread to start shutdown");
 
-        final int resourceId = mRebootSafeMode
-                ? com.android.internal.R.string.reboot_safemode_confirm
-                : (longPressBehavior == 2
-                        ? shutdownConfirmQuestionId
-                        : shutdownConfirmId);
+        if (mRebootSafeMode) {
+            titleResourceId = com.android.internal.R.string.reboot_safemode_title;
+            resourceId = com.android.internal.R.string.reboot_safemode_confirm;
+        } else if (mReboot) {
+            titleResourceId = com.android.internal.R.string.reboot_system;
+            resourceId = com.android.internal.R.string.reboot_confirm;
+        } else {
 
-        final int titleResourceId = mRebootSafeMode
-                ? com.android.internal.R.string.reboot_safemode_title
-                : (mReboot
-                        ? com.android.internal.R.string.reboot_system
-                        : com.android.internal.R.string.power_off);
+            final int longPressBehavior = context.getResources().getInteger(
+                            com.android.internal.R.integer.config_longPressOnPowerBehavior);
 
-        Log.d(TAG, "Notifying thread to start shutdown longPressBehavior=" + longPressBehavior);
+            titleResourceId = com.android.internal.R.string.power_off;
+            if (longPressBehavior == 2) {
+                resourceId = com.android.internal.R.string.shutdown_confirm_question;
+            } else {
+                resourceId = com.android.internal.R.string.shutdown_confirm;
+            }
+
+            Log.d(TAG, "longPressBehavior=" + longPressBehavior);
+        }
 
         if (confirm) {
             final CloseDialogReceiver closer = new CloseDialogReceiver(context);
