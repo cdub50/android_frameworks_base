@@ -1248,7 +1248,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                 mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
             }
 
-            if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0) {
+            if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0 && !mAnimating
+                    && !isShowingSettings()) {
                 animateCollapsePanels();
             }
         }
