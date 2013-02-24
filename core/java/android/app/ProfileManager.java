@@ -18,6 +18,8 @@ package android.app;
 
 import java.util.UUID;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
