@@ -90,10 +90,8 @@ public class NavigationBarView extends LinearLayout {
     int mNavigationIconHints = 0;
 
     private Drawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
-    private Drawable mRecentIcon;
-    private Drawable mRecentLandIcon;
-
-    private DelegateViewHelper mDelegateHelper;
+    
+    public DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
 
     private SettingsObserver mSettingsObserver;
@@ -1074,7 +1072,6 @@ public class NavigationBarView extends LinearLayout {
             }
         }
         makeBar();
-
     }
 
     private Drawable getNavbarIconImage(boolean landscape, String uri) {
@@ -1150,5 +1147,4 @@ public class NavigationBarView extends LinearLayout {
                 return "VISIBLE";
         }
     }
-
 }
