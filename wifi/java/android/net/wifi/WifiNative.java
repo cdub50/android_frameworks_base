@@ -836,4 +836,14 @@ public class WifiNative {
     }
 
     public native static boolean setMode(int mode);
+
+    /* Set the current mode of miracast operation.
+     *  0 = disabled
+     *  1 = operating as source
+     *  2 = operating as sink
+     */
+    public void setMiracastMode(int mode) {
+        // Note: optional feature on the driver. It is ok for this to fail.
+        doBooleanCommand("DRIVER MIRACAST " + mode);
+    }
 }
