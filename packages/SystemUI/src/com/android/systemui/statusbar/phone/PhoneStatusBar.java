@@ -547,6 +547,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             mNotificationPanelDebugText.setVisibility(View.VISIBLE);
         }
 
+        updateShowSearchHoldoff();
+
         if (!mRecreating) {
             mNavigationBarView =
                 (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
@@ -954,6 +956,29 @@ public class PhoneStatusBar extends BaseStatusBar {
         mNavigationBarView.setDelegateView(mSearchPanelView);
     }
 
+    @Override
+    public void showSearchPanel() {
+        super.showSearchPanel();
+        mHandler.removeCallbacks(mShowSearchPanel);
+
+        // we want to freeze the sysui state wherever it is
+        mSearchPanelView.setSystemUiVisibility(mSystemUiVisibility);
+
+        WindowManager.LayoutParams lp =
+            (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
+        lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        mWindowManager.updateViewLayout(mNavigationBarView, lp);
+    }
+
+    @Override
+    public void hideSearchPanel() {
+        super.hideSearchPanel();
+        WindowManager.LayoutParams lp =
+            (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
+        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        mWindowManager.updateViewLayout(mNavigationBarView, lp);
+    }
+
     protected int getStatusBarGravity() {
         return Gravity.TOP | Gravity.FILL_HORIZONTAL;
     }
@@ -975,16 +1000,33 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     };
 
+    private int mShowSearchHoldoff = 0;
+    private final Runnable mShowSearchPanel = new Runnable() {
+        @Override
+        public void run() {
+            showSearchPanel();
+            awakenDreams();
+        }
+    };
+
     View.OnTouchListener mHomeSearchActionListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             switch(event.getAction()) {
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    awakenDreams();
-                break;
-            }
-            return false;
+            case MotionEvent.ACTION_DOWN:
+                if (!shouldDisableNavbarGestures()) {
+                    mHandler.removeCallbacks(mShowSearchPanel);
+                    mHandler.postDelayed(mShowSearchPanel, mShowSearchHoldoff);
+                }
+            break;
+
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                mHandler.removeCallbacks(mShowSearchPanel);
+                awakenDreams();
+            break;
+        }
+        return false;
         }
     };
 
@@ -1000,6 +1042,9 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private void prepareNavigationBarView() {
         mNavigationBarView.reorient();
+        if (mNavigationBarView.getHomeButton() != null) {
+            mNavigationBarView.getHomeButton().setOnTouchListener(mHomeSearchActionListener);
+        }
         mNavigationBarView.getSearchLight().setOnTouchListener(mHomeSearchActionListener);
         updateSearchPanel();
     }
@@ -1224,6 +1269,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         setAreThereNotifications();
+    }
+
+    private void updateShowSearchHoldoff() {
+        mShowSearchHoldoff = mContext.getResources().getInteger(
+            R.integer.config_show_search_delay);
     }
 
     private void loadNotificationShade() {
@@ -2885,6 +2935,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 repositionNavigationBar();
                 updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
                 updateSwapXY();
+                updateShowSearchHoldoff();
             } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
                 repositionNavigationBar();
