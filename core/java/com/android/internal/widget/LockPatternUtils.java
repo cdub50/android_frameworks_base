@@ -17,15 +17,15 @@
 package com.android.internal.widget;
 
 import android.app.ActivityManagerNative;
+import android.app.Profile;
+import android.app.ProfileManager;
 import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.gesture.Gesture;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -134,7 +134,7 @@ public class LockPatternUtils {
     public final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
     public final static String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
     public final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
-    protected final static String GESTURE_EVER_CHOSEN_KEY = "lockscreen.gestureeverchosen";
+    public final static String GESTURE_EVER_CHOSEN_KEY = "lockscreen.gestureeverchosen";
     public final static String PASSWORD_TYPE_KEY = "lockscreen.password_type";
     public static final String PASSWORD_TYPE_ALTERNATE_KEY = "lockscreen.password_type_alternate";
     public final static String LOCK_PASSWORD_SALT_KEY = "lockscreen.password_salt";
@@ -157,6 +157,7 @@ public class LockPatternUtils {
     private final ContentResolver mContentResolver;
     private DevicePolicyManager mDevicePolicyManager;
     private ILockSettings mLockSettingsService;
+    private ProfileManager mProfileManager;
 
     // The current user is set by KeyguardViewMediator and shared by all LockPatternUtils.
     private static volatile int sCurrentUserId = UserHandle.USER_NULL;
@@ -179,6 +180,7 @@ public class LockPatternUtils {
     public LockPatternUtils(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
+        mProfileManager = (ProfileManager) context.getSystemService(Context.PROFILE_SERVICE);
     }
 
     private ILockSettings getLockSettings() {
