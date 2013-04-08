@@ -676,6 +676,12 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mHardwareAccelerated) {
             mWindow.getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         }
+
+        //IME is not showing on first onCreate to be sure
+        //toggle it off for PIE
+        Settings.System.putInt(getContentResolver(),
+                Settings.System.PIE_SOFTKEYBOARD_IS_SHOWING, 0);
+
         initViews();
         mWindow.getWindow().setLayout(MATCH_PARENT, WRAP_CONTENT);
     }
@@ -1420,7 +1426,7 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         return true;
     }
-    
+
     public void showWindow(boolean showInput) {
         if (DEBUG) Log.v(TAG, "Showing window: showInput=" + showInput
                 + " mShowInputRequested=" + mShowInputRequested
@@ -1428,7 +1434,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 + " mWindowCreated=" + mWindowCreated
                 + " mWindowVisible=" + mWindowVisible
                 + " mInputStarted=" + mInputStarted);
-        
+
         if (mInShowWindow) {
             Log.w(TAG, "Re-entrance in to showWindow");
             return;
@@ -1442,6 +1448,11 @@ public class InputMethodService extends AbstractInputMethodService {
             mWindowWasVisible = true;
             mInShowWindow = false;
         }
+
+        //IME softkeyboard is showing....toggle it
+        Settings.System.putInt(getContentResolver(),
+                Settings.System.PIE_SOFTKEYBOARD_IS_SHOWING, 1);
+
         int mKeyboardRotationTimeout = Settings.System.getInt(getContentResolver(),
                 Settings.System.KEYBOARD_ROTATION_TIMEOUT, 0);
         if (mKeyboardRotationTimeout > 0) {
@@ -1538,6 +1549,11 @@ public class InputMethodService extends AbstractInputMethodService {
             onWindowHidden();
             mWindowWasVisible = false;
         }
+
+        //IME softkeyboard is hiding....toggle it
+        Settings.System.putInt(getContentResolver(),
+                Settings.System.PIE_SOFTKEYBOARD_IS_SHOWING, 0);
+
         int mKeyboardRotationTimeout = Settings.System.getInt(getContentResolver(),
                 Settings.System.KEYBOARD_ROTATION_TIMEOUT, 0);
         if (mKeyboardRotationTimeout > 0) {
