@@ -5208,12 +5208,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 preferredRotation = mDeskDockEnablesAccelerometer
                         ? sensorRotation : mDeskDockRotation;
             } else if ((mHdmiPlugged || mWifiDisplayConnected) &&
-                                                        mHdmiRotationLock) {
-                // Ignore sensor when plugged into HDMI.
-                // or Wifi display is connected
-                // Note that the dock orientation overrides the HDMI/Wifi
-                // orientation.
-                preferredRotation = mHdmiRotation;
+                                           mDemoHdmiRotationLock) {
+                // Ignore sensor when plugged into HDMI when demo HDMI rotation lock enabled.
+                // Note that the dock orientation overrides the HDMI orientation.
+                preferredRotation = mDemoHdmiRotation;
+            } else if (mHdmiPlugged && mDockMode == Intent.EXTRA_DOCK_STATE_UNDOCKED
+                    && mUndockedHdmiRotation >= 0) {
+                // Ignore sensor when plugged into HDMI and an undocked orientation has
+                // been specified in the configuration (only for legacy devices without
+                // full multi-display support).
+                // Note that the dock orientation overrides the HDMI orientation.
+                preferredRotation = mUndockedHdmiRotation;
+            } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
+                // Application just wants to remain locked in the last rotation.
+                preferredRotation = lastRotation;
             } else if ((mUserRotationMode == WindowManagerPolicy.USER_ROTATION_FREE
                             && (orientation == ActivityInfo.SCREEN_ORIENTATION_USER
                                     || orientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
