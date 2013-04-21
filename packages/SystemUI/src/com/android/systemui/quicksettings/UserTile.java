@@ -49,6 +49,8 @@ import com.android.systemui.statusbar.phone.QuickSettingsController;
 public class UserTile extends QuickSettingsTile {
 
     private static final String TAG = "UserTile";
+    private final boolean DBG = false;
+
     private Drawable userAvatar;
     private AsyncTask<Void, Void, Pair<String, Drawable>> mUserInfoTask;
     public static QuickSettingsTile mInstance;
@@ -77,7 +79,7 @@ public class UserTile extends QuickSettingsTile {
                         WindowManagerGlobal.getWindowManagerService().lockNow(
                                 LockPatternUtils.USER_SWITCH_LOCK_OPTIONS);
                     } catch (RemoteException e) {
-                        Log.e(TAG, "Couldn't show user switcher", e);
+                        if (DBG) Log.e(TAG, "Couldn't show user switcher", e);
                     }
                 } else {
                     Intent intent = new Intent(Intent.ACTION_VIEW, ContactsContract.Profile.CONTENT_URI);
@@ -120,10 +122,10 @@ public class UserTile extends QuickSettingsTile {
             currentUserContext = mContext.createPackageContextAsUser("android", 0,
                     new UserHandle(userInfo.id));
         } catch (NameNotFoundException e) {
-            Log.e(TAG, "Couldn't create user context", e);
+            if (DBG) Log.e(TAG, "Couldn't create user context", e);
             throw new RuntimeException(e);
         } catch (RemoteException e) {
-            Log.e(TAG, "Couldn't get user info", e);
+            if (DBG) Log.e(TAG, "Couldn't get user info", e);
         }
         final int userId = userInfo.id;
         final String userName = userInfo.name;
