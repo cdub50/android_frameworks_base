@@ -26,6 +26,8 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -64,6 +66,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 import libcore.util.Objects;
 
@@ -1338,6 +1341,11 @@ public final class PowerManagerService extends IPowerManager.Stub
 
         if (Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.WAKEUP_WHEN_PLUGGED_UNPLUGGED, 1) == 0) {
+            return false;
+        }
+ 
+        // If we are in FPO mode, we need to sleep.
+        if (isFastPowerOnActive()) {
             return false;
         }
 
@@ -2823,5 +2831,16 @@ public final class PowerManagerService extends IPowerManager.Stub
                 return "blanked=" + mBlanked;
             }
         }
+    }
+
+    private Boolean isFastPowerOnActive() {
+        ActivityManager activityManager = (ActivityManager) mContext.getSystemService( Context.ACTIVITY_SERVICE );
+        List<RunningAppProcessInfo> procInfos = activityManager.getRunningAppProcesses();
+        for(int i = 0; i < procInfos.size(); i++){
+            if (procInfos.get(i).processName.equals("com.qualcomm.fastboot")) {
+                return true;
+            }
+        }
+        return false;
     }
 }
