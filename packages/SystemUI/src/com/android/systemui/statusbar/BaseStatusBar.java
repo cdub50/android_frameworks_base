@@ -130,6 +130,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private boolean mPieShowTrigger = false;
     private boolean mForceBottomTrigger = false;
+    private boolean mDisableTriggers = false;
     private float mPieTriggerThickness;
     private float mPieTriggerHeight;
     private int mPieTriggerGravityLeftRight;
@@ -1519,7 +1520,11 @@ public abstract class BaseStatusBar extends SystemUI implements
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.PIE_GRAVITY), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.PIE_TRIGGER_SIZE), false, this);
+                    Settings.System.PIE_TRIGGER_GRAVITY_LEFT_RIGHT), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.PIE_TRIGGER_THICKNESS), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.PIE_TRIGGER_HEIGHT), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.PIE_TRIGGER_SHOW), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -1556,11 +1561,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                     mContext.getResources().getDimension(R.dimen.pie_trigger_thickness));
             mPieTriggerHeight = Settings.System.getFloat(mContext.getContentResolver(),
                     Settings.System.PIE_TRIGGER_HEIGHT,
-                    0.7f);
+                    0.8f);
             mPieTriggerGravityLeftRight = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.PIE_TRIGGER_GRAVITY_LEFT_RIGHT,
                     Gravity.CENTER_VERTICAL);
-            mPieImeIsShowing = Settings.System.getInt(mContext.getContentResolver(),
+            mPieImeIsShowing = Settings.System.getFloat(mContext.getContentResolver(),
                     Settings.System.PIE_SOFTKEYBOARD_IS_SHOWING, 0) == 1
                     && Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.PIE_ADJUST_TRIGGER_FOR_IME, 1) == 1;
@@ -1794,19 +1799,23 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private WindowManager.LayoutParams getPieTriggerLayoutParams(Position position) {
         final Resources res = mContext.getResources();
-        float heightFactor;
+
+        float pieTriggerHeight = mPieTriggerHeight;
+        final float pieImePortraitMinHeight = 0.52f;
+        final float pieImeLandscapeMinHeight = 0.32f;
         if (mPieImeIsShowing && isScreenPortrait()
-                && !mForceDisableBottomAndTopTrigger) {
-            heightFactor = 0.52f;
+                && !mForceDisableBottomAndTopTrigger
+                && pieTriggerHeight > pieImePortraitMinHeight) {
+            pieTriggerHeight = pieImePortraitMinHeight;
         } else if (mPieImeIsShowing && !isScreenPortrait()
-                && !mForceDisableBottomAndTopTrigger) {
-            heightFactor = 0.32f;
-        } else {
-            heightFactor = 0.8f;
+                && !mForceDisableBottomAndTopTrigger
+                && pieTriggerHeight > pieImeLandscapeMinHeight) {
+            pieTriggerHeight = pieImeLandscapeMinHeight;
         }
-        int width = (int) (res.getDisplayMetrics().widthPixels * 0.8f);
-        int height = (int) (res.getDisplayMetrics().heightPixels * heightFactor);
-        int triggerThickness = (int) ((mPieTriggerSize * res.getDisplayMetrics().density) + 0.5);
+
+        int width = (int) (res.getDisplayMetrics().widthPixels * 0.9f);
+        int height = (int) (res.getDisplayMetrics().heightPixels * pieTriggerHeight);
+        int triggerThickness = (int) ((mPieTriggerThickness * res.getDisplayMetrics().density) + 0.5);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 (position == Position.TOP || position == Position.BOTTOM
                         ? width : triggerThickness),
@@ -1815,8 +1824,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
-                        /* | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM */,
+                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.TRANSLUCENT);
         // This title is for debugging only. See: dumpsys window
         lp.setTitle("PieTrigger" + position.name());
@@ -1830,6 +1838,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (mPieImeIsShowing && !mForceDisableBottomAndTopTrigger
                     && (position == Position.LEFT || position == Position.RIGHT)) {
             lp.gravity = position.ANDROID_GRAVITY | Gravity.TOP;
+        } else if (position == Position.LEFT || position == Position.RIGHT) {
+            lp.gravity = position.ANDROID_GRAVITY | mPieTriggerGravityLeftRight;
         } else {
             lp.gravity = position.ANDROID_GRAVITY;
         }
