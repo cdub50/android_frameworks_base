@@ -317,7 +317,7 @@ public class PieLayout extends FrameLayout implements View.OnTouchListener {
 
     private void getDimensions() {
         mPieScale = Settings.System.getFloat(mContext.getContentResolver(),
-                Settings.System.PIE_SIZE, 1.1f);
+                Settings.System.PIE_SIZE, 1.0f);
 
         final Resources res = mContext.getResources();
 
