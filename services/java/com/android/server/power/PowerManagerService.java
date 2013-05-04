@@ -358,6 +358,10 @@ public final class PowerManagerService extends IPowerManager.Stub
     // The screen auto-brightness responsitivity factor, from 0.2 to 3.
     private float mAutoBrightnessResponsitivityFactor;
 
+    // Alternative auto panel value for special devices
+    // default = -1, set over config.xml
+    private int mPanelAutoValue = -1;
+
     // The screen brightness mode.
     // One of the Settings.System.SCREEN_BRIGHTNESS_MODE_* constants.
     private int mScreenBrightnessModeSetting;
@@ -448,7 +452,8 @@ public final class PowerManagerService extends IPowerManager.Stub
         mDisplayBlanker.unblankAllDisplays();
 
         mAutoBrightnessHandler = new AutoBrightnessHandler(context);
-
+        mPanelAutoValue = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_panelAutoBrightnessValue);
     }
 
     public void setPolicy(WindowManagerPolicy policy) {
@@ -621,15 +626,11 @@ public final class PowerManagerService extends IPowerManager.Stub
         mScreenBrightnessModeSetting = Settings.System.getIntForUser(resolver,
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
-        if (oldScreenBrightnessModeSetting != mScreenBrightnessModeSetting) {
-            mAutoBrightnessHandler.onAutoBrightnessChanged(mScreenBrightnessModeSetting);
+        // Set autobrightness/brigthness mode change for devices different then default
+        if (oldScreenBrightnessModeSetting != mScreenBrightnessModeSetting
+                && mPanelAutoValue > -1) {
+            mAutoBrightnessHandler.onAutoBrightnessChanged(mScreenBrightnessModeSetting, mPanelAutoValue);
         }
-
-        final float newAutoBrightnessResponsitivityFactor = Settings.System.getFloatForUser(resolver,
-                Settings.System.AUTO_BRIGHTNESS_RESPONSIVENESS, 1.0f,
-                UserHandle.USER_CURRENT);
-        mAutoBrightnessResponsitivityFactor =
-                Math.min(Math.max(newAutoBrightnessResponsitivityFactor, 0.2f), 3.0f);
 
         mDirty |= DIRTY_SETTINGS;
     }
