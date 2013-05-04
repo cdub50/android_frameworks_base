@@ -1114,7 +1114,6 @@
          where if the preferred is used we don't try the others. -->
     <bool name="config_dontPreferApn">false</bool>
 
-<<<<<<< HEAD
     <!-- Vibrator pattern to be used as the default for notifications
          that specify DEFAULT_VIBRATE.
      -->
@@ -1228,5 +1227,8 @@
 
     <!-- Name of that key handler class -->
     <string name="config_deviceKeyHandlerClass" translatable="false"></string>
+
+    <!-- Integer to configure panel auto brightness mode when changed -->
+    <integer name="config_panelAutoBrightnessValue">-1</integer>
 
 </resources>
