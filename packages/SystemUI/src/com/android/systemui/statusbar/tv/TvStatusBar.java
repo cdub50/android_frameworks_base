@@ -90,6 +90,9 @@ public class TvStatusBar extends BaseStatusBar {
     public void toggleNotificationShade() {
     }
 
+    @Override
+    public void toggleQSShade() {
+    }
 
     @Override
     public void toggleRecentApps() {
@@ -156,7 +159,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void animateExpandSettingsPanel() {
+    public void animateExpandSettingsPanel(boolean flip) {
     }
 
     @Override
