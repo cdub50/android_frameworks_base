@@ -3130,7 +3130,12 @@ public class PhoneStatusBar extends BaseStatusBar {
         mNotificationData.clear();
 
         makeStatusBarView();
-        repositionNavigationBar();
+
+        if (mNavigationBarView != null) {
+            // recreate and reposition navigationbar
+            mNavigationBarView.recreateNavigationBar();
+            repositionNavigationBar();
+        }
 
         // recreate StatusBarIconViews.
         for (int i = 0; i < nIcons; i++) {
