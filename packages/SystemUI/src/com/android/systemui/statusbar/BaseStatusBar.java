@@ -287,8 +287,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private boolean mDeviceProvisioned = false;
 
-    private boolean mShowNotificationCounts;
-
     public IStatusBarService getStatusBarService() {
         return mBarService;
     }
