@@ -26,6 +26,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.PorterDuff;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.CharacterStyle;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.provider.Settings;
@@ -70,10 +76,14 @@ public class BatteryController extends BroadcastReceiver {
     private static final int BATTERY_TEXT_STYLE_MIN     = R.string.status_bar_settings_battery_meter_min_format;
 
     private boolean mBatteryPlugged = false;
+
+    private int color = 0;
     private int mLevel = 0;
+    private int customColor;
+    private int mBatteryStyle;
     private int mTextColor = -2;
     private int mTextChargingColor = -2;
-    private int mBatteryStyle;
+
     private int mBatteryIcon = BATTERY_ICON_STYLE_NORMAL;
 
     Handler mHandler;
@@ -102,6 +112,12 @@ public class BatteryController extends BroadcastReceiver {
                     false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_BATTERY_TEXT_CHARGING_COLOR),
+                    false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_ICON_COLOR),
+                    false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.ICON_COLOR_BEHAVIOR),
                     false, this);
         }
 
@@ -158,11 +174,33 @@ public class BatteryController extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
         if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
+
             mLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-            mBatteryPlugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
+
+            final int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
+                    BatteryManager.BATTERY_STATUS_UNKNOWN);
+
+            mBatteryPlugged = false;
+            switch (status) {
+                case BatteryManager.BATTERY_STATUS_CHARGING: 
+                case BatteryManager.BATTERY_STATUS_FULL:
+                    mBatteryPlugged = true;
+                    break;
+            }
+
+            final int batteryIcon = mBatteryPlugged ? R.drawable.stat_sys_battery_charge
+                    : R.drawable.stat_sys_battery;
+
             int N = mIconViews.size();
             for (int i=0; i<N; i++) {
                 ImageView v = mIconViews.get(i);
+                Drawable batteryBitmap = mContext.getResources().getDrawable(batteryIcon);
+                if (customColor) {
+                    batteryBitmap.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+                } else {
+                    batteryBitmap.clearColorFilter();
+                }
+                v.setImageDrawable(batteryBitmap);
                 v.setImageLevel(mLevel);
                 v.setContentDescription(mContext.getString(R.string.accessibility_battery_level,
                         mLevel));
@@ -182,6 +220,7 @@ public class BatteryController extends BroadcastReceiver {
             for (BatteryStateChangeCallback cb : mChangeCallbacks) {
                 cb.onBatteryLevelChanged(mLevel, mBatteryPlugged);
             }
+
             updateBattery();
         }
     }
@@ -251,6 +290,12 @@ public class BatteryController extends BroadcastReceiver {
 
         mBatteryStyle = (Settings.System.getInt(resolver,
                 Settings.System.STATUS_BAR_BATTERY, 0));
+
+        color = (Settings.System.getInt(resolver,
+                Settings.System.STATUS_ICON_COLOR, 0));
+
+        customColor = (Settings.System.getInt(resolver,
+                Settings.System.ICON_COLOR_BEHAVIOR, 0)) == 1;
 
         boolean disableStatusBarInfo = Settings.System.getInt(resolver,
                 Settings.System.PIE_DISABLE_STATUSBAR_INFO, 0) == 1;

@@ -4272,6 +4272,20 @@ public final class Settings {
         public static final String STATUS_BAR_TRAFFIC = "status_bar_traffic";
 
         /**
+         * Status icon color.
+         *
+         * @hide
+         */
+        public static final String STATUS_ICON_COLOR = "status_icon_color";
+
+        /**
+         * Reset to default icon of System Icons in Statusbar.
+         *
+         * @hide
+         */
+        public static final String ICON_COLOR_BEHAVIOR = "icon_color_behavior";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
