@@ -405,5 +405,4 @@ public class EditorInfo implements InputType, Parcelable {
     public int describeContents() {
         return 0;
     }
-
 }
