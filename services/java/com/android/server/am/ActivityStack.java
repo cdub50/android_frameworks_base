@@ -2567,7 +2567,7 @@ final class ActivityStack {
 
         int err = ActivityManager.START_SUCCESS;
 
-        mPm.cpuBoost(1500000);
+        mPm.cpuBoost(1550000);
 
         ProcessRecord callerApp = null;
 
