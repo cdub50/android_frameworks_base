@@ -2730,12 +2730,6 @@ public final class Settings {
          */
         public static final String PIE_TRIGGER_GRAVITY_LEFT_RIGHT = "pie_trigger_gravity_left_right";
 
-       /**
-         * HALO enabled, should default to 0 (HALO is disabled)
-         * @hide
-         */
-        public static final String HALO_ENABLED = "halo_enabled";
-
         /**
          * Show pie trigger
          * @hide
@@ -2760,6 +2754,12 @@ public final class Settings {
          */
         public static final String PIE_BUTTON_COLOR = "pie_button_color";
 
+	/**
+         * HALO enabled, should default to 0 (HALO is disabled)
+         * @hide
+         */
+        public static final String HALO_ENABLED = "halo_enabled";
+
  	/**
          * HALO, should default to 0 (no, do not show)
          * @hide
@@ -2783,6 +2783,13 @@ public final class Settings {
          * @hide
          */
         public static final String HALO_SIZE = "halo_size";
+
+	/**
+         * HALO pause activities?, defaults to 0 (no, do not pause) on devices which isLargeRAM() == true
+         * otherwise it defaults to 1 (yes, do pause)
+         * @hide
+         */
+        public static final String HALO_PAUSE = "halo_pause";
 
         /**
          * Pie button press color
