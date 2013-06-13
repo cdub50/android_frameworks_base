@@ -1,7 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
- * Copyright (C) 2010-2013 CyanogenMod Project
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2010-2012 CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +23,18 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.R;
 
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.KeyguardManager;
 import android.app.Profile;
 import android.app.ProfileManager;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
-import android.content.ServiceConnection;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -49,7 +43,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.Message;
-import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -58,19 +51,14 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
-import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.util.Log;
-import android.util.Slog;
 import android.util.TypedValue;
 import android.view.InputDevice;
-import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -86,7 +74,6 @@ import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.android.collect.Lists;
 import com.android.internal.app.ThemeUtils;
 
 import java.util.ArrayList;
@@ -304,12 +291,13 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         };
         onAirplaneModeChanged();
 
+        final ContentResolver cr = mContext.getContentResolver();
         mItems = new ArrayList<Action>();
-        mEnableFastPowerOn = Settings.System.getInt(
-                                mContext.getContentResolver(),
-                                Settings.System.ENABLE_FAST_POWERON, 1) == 1;
-        if (mEnableFastPowerOn) {
-            // add: fastboot
+
+        boolean showFastPowerOn = Settings.System.getIntForUser(cr,
+                Settings.System.ENABLE_FAST_POWERON, 0, UserHandle.USER_CURRENT) == 1;
+        if (showFastPowerOn) {
+            // first: fastboot
             mItems.add(
                 new SinglePressAction(
                         com.android.internal.R.drawable.ic_lock_power_off,
@@ -323,7 +311,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                         mWindowManagerFuncs.shutdown(true);
                         return true;
                     }
-
 
                     public boolean showDuringKeyguard() {
                         return true;
@@ -341,8 +328,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                         R.string.global_action_power_off) {
 
                     public void onPress() {
-                        // shutdown by making sure radio and power are handled
-                        // accordingly.
+                        // shutdown by making sure radio and power are handled accordingly.
                         mWindowManagerFuncs.shutdown(true);
                     }
 
@@ -358,8 +344,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         // next: reboot
         // only shown if enabled, enabled by default
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.POWER_MENU_REBOOT_ENABLED, 1) == 1) {
+        boolean showReboot = Settings.System.getIntForUser(cr,
+                Settings.System.POWER_MENU_REBOOT_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
+        if (showReboot) {
             mItems.add(
                 new SinglePressAction(R.drawable.ic_lock_reboot, R.string.global_action_reboot) {
                     public void onPress() {
@@ -383,21 +370,23 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         // next: airplane mode
         // only shown if enabled, enabled by default
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.POWER_MENU_AIRPLANE_ENABLED, 1) == 1) {
+        boolean showAirplaneMode = Settings.System.getIntForUser(cr,
+                Settings.System.POWER_MENU_AIRPLANE_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
+        if (showAirplaneMode) {
             mItems.add(mAirplaneModeOn);
         }
 
         // next: bug report
         // only shown if enabled, disabled by default
-        if (Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0) {
+        boolean showBugReport = Settings.Global.getInt(cr,
+                Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0;
+        if (showBugReport) {
             mItems.add(
                 new SinglePressAction(com.android.internal.R.drawable.stat_sys_adb,
                         R.string.global_action_bug_report) {
 
                     public void onPress() {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getUiContext());
                         builder.setTitle(com.android.internal.R.string.bugreport_title);
                         builder.setMessage(com.android.internal.R.string.bugreport_message);
                         builder.setNegativeButton(com.android.internal.R.string.cancel, null);
@@ -439,19 +428,24 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         // next: expanded desktop
-        // only shown if enabled, disabled by default
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.POWER_MENU_EXPANDED_DESKTOP_ENABLED, 0) == 1) {
+        // only shown if enabled and expanded desktop is enabled, disabled by default
+        boolean showExpandedDesktop =
+                Settings.System.getIntForUser(cr,
+                        Settings.System.EXPANDED_DESKTOP_MODE, 0, UserHandle.USER_CURRENT) != 0
+                && Settings.System.getIntForUser(cr,
+                        Settings.System.POWER_MENU_EXPANDED_DESKTOP_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
+        if (showExpandedDesktop) {
             mItems.add(mExpandDesktopModeOn);
         }
 
-        // next: profile
+        // next: profiles
         // only shown if both system profiles and the menu item is enabled, enabled by default
-        final int mProfile = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.POWER_MENU_PROFILES_ENABLED, 1);
-        final KeyguardManager km = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-        if ((Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.SYSTEM_PROFILES_ENABLED, 1) == 1) && (mProfile != 0)) {
+        boolean showProfiles =
+                Settings.System.getIntForUser(cr,
+                        Settings.System.SYSTEM_PROFILES_ENABLED, 1, UserHandle.USER_CURRENT) == 1
+                && Settings.System.getIntForUser(cr,
+                        Settings.System.POWER_MENU_PROFILES_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
+        if (showProfiles) {
             mItems.add(
                 new ProfileChooseAction() {
                     public void onPress() {
@@ -463,11 +457,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     }
 
                     public boolean showDuringKeyguard() {
-                        if (mProfile == 2 && !km.isKeyguardSecure()) {
-                            return true;
-                        } else {
-                            return false;
-                        }
+                        return false;
                     }
 
                     public boolean showBeforeProvisioning() {
@@ -478,8 +468,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         // next: screenshot
         // only shown if enabled, disabled by default
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.POWER_MENU_SCREENSHOT_ENABLED, 0) == 1) {
+        boolean showScreenshot = Settings.System.getIntForUser(cr,
+                Settings.System.POWER_MENU_SCREENSHOT_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
+        if (showScreenshot) {
             mItems.add(
                 new SinglePressAction(R.drawable.ic_lock_screenshot, R.string.global_action_screenshot) {
                     public void onPress() {
@@ -497,16 +488,18 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         // next: silent mode
-        if ((Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.POWER_MENU_SOUND_ENABLED, 1) == 1) &&
-                (SHOW_SILENT_TOGGLE)) {
+        // only shown if enabled, enabled by default
+        boolean showSoundMode = SHOW_SILENT_TOGGLE && Settings.System.getIntForUser(cr,
+                Settings.System.POWER_MENU_SOUND_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
+        if (showSoundMode) {
             mItems.add(mSilentModeAction);
         }
 
-        // next: torch
+        // next: torch mode
         // only shown if enabled, disabled by default
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.POWER_MENU_TORCH_ENABLED, 0) == 1) {
+        boolean showTorch = Settings.System.getIntForUser(cr,
+                Settings.System.POWER_MENU_TORCH_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
+        if (showTorch) {
             mItems.add(
                 new SinglePressAction(
                         com.android.internal.R.drawable.ic_lock_torch,
@@ -527,10 +520,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 });
         }
 
-        // last: users
+        // last: user switch
         // only shown if enabled, disabled by default
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.POWER_MENU_USER_ENABLED, 0) == 1) {
+        boolean showUsers = Settings.System.getIntForUser(cr,
+                Settings.System.POWER_MENU_USER_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
+        if (showUsers) {
             addUsersToMenu(mItems);
         }
 
@@ -712,7 +706,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 @Override
                 public void onServiceDisconnected(ComponentName name) {}
             };
-            if (mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE)) {
+
+            if (mContext.bindServiceAsUser(intent, conn, Context.BIND_AUTO_CREATE, UserHandle.CURRENT)) {
                 mScreenshotConnection = conn;
                 mHandler.postDelayed(mScreenshotTimeout, 10000);
             }
@@ -727,7 +722,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         mDialog.setTitle(R.string.global_actions);
 
-        if (SHOW_SILENT_TOGGLE) {
+        if (mShowSilentToggle) {
             IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
             mContext.registerReceiver(mRingerModeReceiver, filter);
         }
@@ -744,7 +739,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     /** {@inheritDoc} */
     public void onDismiss(DialogInterface dialog) {
-        if (SHOW_SILENT_TOGGLE) {
+        if (mShowSilentToggle) {
             try {
                 mContext.unregisterReceiver(mRingerModeReceiver);
             } catch (IllegalArgumentException ie) {
@@ -1287,10 +1282,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private void onExpandDesktopModeChanged() {
-        boolean expandDesktopModeOn = Settings.System.getInt(
+        boolean expandDesktopModeOn = Settings.System.getIntForUser(
                 mContext.getContentResolver(),
                 Settings.System.EXPANDED_DESKTOP_STATE,
-                0) == 1;
+                0, UserHandle.USER_CURRENT) == 1;
         mExpandDesktopModeOn.updateState(expandDesktopModeOn ? ToggleAction.State.On : ToggleAction.State.Off);
     }
 
@@ -1315,10 +1310,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
      * Change the expand desktop mode system setting
      */
     private void changeExpandDesktopModeSystemSetting(boolean on) {
-        Settings.System.putInt(
+        Settings.System.putIntForUser(
                 mContext.getContentResolver(),
                 Settings.System.EXPANDED_DESKTOP_STATE,
-                on ? 1 : 0);
+                on ? 1 : 0, UserHandle.USER_CURRENT);
     }
 
     /**

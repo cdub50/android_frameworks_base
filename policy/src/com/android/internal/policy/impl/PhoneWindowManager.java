@@ -1,5 +1,6 @@
 /*
- * File modifications copyright (C) 2012 The CyanogenMod Project
+ * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2012-2013 The CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,9 +70,6 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
-
-import dalvik.system.DexClassLoader;
-
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -103,6 +101,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import com.android.internal.R;
+import com.android.internal.app.ThemeUtils;
 import com.android.internal.os.DeviceKeyHandler;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.keyguard.KeyguardViewManager;
@@ -110,6 +109,8 @@ import com.android.internal.policy.impl.keyguard.KeyguardViewMediator;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.widget.PointerLocationView;
+
+import dalvik.system.DexClassLoader;
 
 import java.io.File;
 import java.io.FileReader;
@@ -303,8 +304,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mSystemReady;
     boolean mSystemBooted;
     boolean mHdmiPlugged;
-    int mUiMode;
     boolean mWifiDisplayConnected;
+
+    int mUiMode;
     int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     int mLidOpenRotation;
     int mCarDockRotation;
@@ -679,15 +681,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.KEY_MENU_ACTION), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.KEY_MENU_LONG_PRESS_ACTION), false, this);
+                    Settings.System.KEY_MENU_ACTION), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.KEY_ASSIST_ACTION), false, this);
+                    Settings.System.KEY_MENU_LONG_PRESS_ACTION), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.KEY_ASSIST_LONG_PRESS_ACTION), false, this);
+                    Settings.System.KEY_ASSIST_ACTION), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.KEY_APP_SWITCH_ACTION), false, this);
+                    Settings.System.KEY_ASSIST_LONG_PRESS_ACTION), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.KEY_APP_SWITCH_LONG_PRESS_ACTION), false, this);
+                    Settings.System.KEY_APP_SWITCH_ACTION), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.KEY_APP_SWITCH_LONG_PRESS_ACTION), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.KEY_CAMERA_ACTION), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -902,6 +912,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void run() {
             takeScreenshot();
+        }
+    };
+
+    private final Runnable mRingerChordLongPress = new Runnable() {
+        public void run() {
+            // Do the switch
+            final AudioManager am = (AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE);
+            final int ringerMode = am.getRingerMode();
+            final VolumePanel volumePanel = new VolumePanel(ThemeUtils.createUiContext(mContext),
+                                                              (AudioService) getAudioService());
+            if (ringerMode == AudioManager.RINGER_MODE_NORMAL) {
+                boolean vibrateSetting = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.VIBRATE_WHEN_RINGING, 0, UserHandle.USER_CURRENT) != 0;
+                am.setRingerMode(vibrateSetting ? AudioManager.RINGER_MODE_VIBRATE :
+                                   AudioManager.RINGER_MODE_SILENT);
+            } else {
+                am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+            }
+            volumePanel.postVolumeChanged(AudioManager.STREAM_RING,AudioManager.FLAG_SHOW_UI
+                                          | AudioManager.FLAG_VIBRATE);
         }
     };
 
@@ -1647,8 +1677,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 updateOrientationListenerLp();
             }
 
-            mUserRotationAngles = Settings.System.getInt(resolver,
-                    Settings.System.ACCELEROMETER_ROTATION_ANGLES, -1);
+            mUserRotationAngles = Settings.System.getIntForUser(resolver,
+                    Settings.System.ACCELEROMETER_ROTATION_ANGLES, -1, UserHandle.USER_CURRENT);
 
             if (mSystemReady) {
                 int pointerLocation = Settings.System.getIntForUser(resolver,
@@ -1670,6 +1700,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 updateRotation = true;
             }
         }
+
         if (updateRotation) {
             updateRotation(true);
         } else if (updateDisplayMetrics) {
@@ -2485,6 +2516,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return timeoutTime - now;
                 }
             }
+
             if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
                     && mVolumeDownKeyConsumedByScreenshotChord) {
                 if (!down) {
@@ -3079,36 +3111,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return mSearchManager;
     }
 
-    private void preloadRecentApps() {
-        mPreloadedRecentApps = true;
-        try {
-            IStatusBarService statusbar = getStatusBarService();
-            if (statusbar != null) {
-                statusbar.preloadRecentApps();
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "RemoteException when preloading recent apps", e);
-            // re-acquire status bar service next time it is needed.
-            mStatusBarService = null;
-        }
-    }
-
-    private void cancelPreloadRecentApps() {
-        if (mPreloadedRecentApps) {
-            mPreloadedRecentApps = false;
-            try {
-                IStatusBarService statusbar = getStatusBarService();
-                if (statusbar != null) {
-                    statusbar.cancelPreloadRecentApps();
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "RemoteException when showing recent apps", e);
-                // re-acquire status bar service next time it is needed.
-                mStatusBarService = null;
-            }
-        }
-    }
-
     private void toggleRecentApps() {
         mPreloadedRecentApps = false; // preloading no longer needs to be canceled
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
@@ -3492,7 +3494,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // Status bar may go away, so the screen area it occupies
                     // is available to apps but just covering them when the
                     // status bar is visible.
-                    mDockTop = mUnrestrictedScreenTop+mStatusBarHeight;
+                    mDockTop = mUnrestrictedScreenTop + mStatusBarHeight;
 
                     mContentTop = mCurTop = mDockTop;
                     mContentBottom = mCurBottom = mDockBottom;
@@ -3755,7 +3757,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     } else {
                         // Full screen windows are always given a layout that is as if the
                         // status bar and other transient decors are gone.  This is to avoid
-                        // bad states when moving from a window that is not hding the
+                        // bad states when moving from a window that is not hiding the
                         // status bar to one that is.
                         cf.left = mRestrictedScreenLeft;
                         cf.top = mRestrictedScreenTop;
@@ -4683,7 +4685,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             Log.w(TAG, "ITelephony threw RemoteException", ex);
                         }
                     }
-
                     interceptPowerKeyDown(!isScreenOn || hungUp
                             || mVolumeDownKeyTriggered || mVolumeUpKeyTriggered);
                 } else {
@@ -4932,6 +4933,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
     };
+
     BroadcastReceiver mWifiDisplayReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
@@ -5072,7 +5074,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguardMediator == null) return false;
         return mKeyguardMediator.isShowingAndNotHidden();
     }
-
 
     /** {@inheritDoc} */
     public boolean isKeyguardLocked() {
@@ -5632,7 +5633,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } catch (ActivityNotFoundException e) {
             }
         }
-
         mContext.startActivityAsUser(mHomeIntent, UserHandle.CURRENT);
     }
     
@@ -5711,6 +5711,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         ringTone.setStreamType(AudioManager.STREAM_MUSIC);
         ringTone.play();
     }
+
     private boolean isGlobalAccessibilityGestureEnabled() {
         return Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED, 0) == 1;
@@ -5824,9 +5825,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return diff;
     }
 
-    // Used for menu button behaviour etc which we let stay for hardware key
-    // devices like it should without navbar. See for more details
-    // PhoneWindowManager.java @Line 1115
+    // Use this instead of checking config_showNavigationBar so that it can be consistently
+    // overridden by qemu.hw.mainkeys in the emulator.
     public boolean hasNavigationBar() {
         return mHasNavigationBar;
     }
