@@ -312,6 +312,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      */
     // protected by mSettingsLock
     private int mRingerMode;
+    // last non-normal ringer mode
+    private int mLastSilentRingerMode = -1;
 
     /** @see System#MODE_RINGER_STREAMS_AFFECTED */
     private int mRingerModeAffectedStreams;
@@ -1013,48 +1015,57 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** @see AudioManager#setStreamVolume(int, int, int) */
     public void setStreamVolume(int streamType, int index, int flags) {
-        if (mUseFixedVolume) {
-            return;
-        }
-
         ensureValidStreamType(streamType);
         VolumeStreamState streamState = mStreamStates[mStreamVolumeAlias[streamType]];
 
         final int device = getDeviceForStream(streamType);
         int oldIndex;
 
-        synchronized (mSafeMediaVolumeState) {
-            // reset any pending volume command
-            mPendingVolumeCommand = null;
-
-            oldIndex = streamState.getIndex(device);
+        flags &= ~AudioManager.FLAG_FIXED_VOLUME;
+        if ((mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
+                ((device & mFixedVolumeDevices) != 0)) {
+            flags |= AudioManager.FLAG_FIXED_VOLUME;
+            index = mStreamStates[streamType].getMaxIndex();
+            oldIndex = index;
+        } else {
+            // get last audible index if stream is muted, current index otherwise
+            oldIndex = streamState.getIndex(device,
+                                            (streamState.muteCount() != 0) /* lastAudible */);
 
             index = rescaleIndex(index * 10, streamType, mStreamVolumeAlias[streamType]);
 
-            flags &= ~AudioManager.FLAG_FIXED_VOLUME;
-            if ((mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
-                    ((device & mFixedVolumeDevices) != 0)) {
-                flags |= AudioManager.FLAG_FIXED_VOLUME;
-
-                // volume is either 0 or max allowed for fixed volume devices
-                if (index != 0) {
-                    if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE &&
-                            (device & mSafeMediaVolumeDevices) != 0) {
-                        index = mSafeMediaVolumeIndex;
-                    } else {
-                        index = streamState.getMaxIndex();
-                    }
-                }
-            }
-
             if (!checkSafeMediaVolume(mStreamVolumeAlias[streamType], index, device)) {
-                mVolumePanel.postDisplaySafeVolumeWarning(flags);
-                mPendingVolumeCommand = new StreamVolumeCommand(
-                                                    streamType, index, flags, device);
-            } else {
-                onSetStreamVolume(streamType, index, flags, device);
-                index = mStreamStates[streamType].getIndex(device);
+                return;
             }
+
+            // setting volume on master stream type also controls silent mode
+            if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
+                    (mStreamVolumeAlias[streamType] == getMasterStreamType())) {
+                int newRingerMode;
+                if (index == 0) {
+                    synchronized (mSettingsLock) {
+                        if (mLastSilentRingerMode != -1) {
+                            newRingerMode = mLastSilentRingerMode;
+                        } else {
+                            newRingerMode = mHasVibrator ? AudioManager.RINGER_MODE_VIBRATE
+                                                         : AudioManager.RINGER_MODE_SILENT;
+                        }
+                    }
+                    setStreamVolumeInt(mStreamVolumeAlias[streamType],
+                                       index,
+                                       device,
+                                       false,
+                                       true);
+                } else {
+                    newRingerMode = AudioManager.RINGER_MODE_NORMAL;
+                }
+                setRingerMode(newRingerMode);
+            }
+
+            setStreamVolumeInt(mStreamVolumeAlias[streamType], index, device, false, true);
+            // get last audible index if stream is muted, current index otherwise
+            index = mStreamStates[streamType].getIndex(device,
+                                    (mStreamStates[streamType].muteCount() != 0) /* lastAudible */);
         }
         sendVolumeUpdate(streamType, oldIndex, index, flags);
     }
@@ -1398,6 +1409,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private void setRingerModeInt(int ringerMode, boolean persist) {
         synchronized(mSettingsLock) {
             mRingerMode = ringerMode;
+            if (ringerMode != AudioManager.RINGER_MODE_NORMAL) {
+                mLastSilentRingerMode = ringerMode;
+            }
         }
 
         // Mute stream if not previously muted by ringer mode and ringer mode
