@@ -4234,6 +4234,13 @@ public final class Settings {
         public static final String ACTIVE_DISPLAY_SHOW_DATE = "active_display_show_date";
 
         /**
+         * Choose side for Clear button on Recents window
+         * 0 = left, 1 = right
+         * @hide
+         */
+        public static final String CLEAR_RECENTS_POSITION = "clear_recents_position";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
