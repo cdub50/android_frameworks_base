@@ -65,10 +65,10 @@ public class NotificationData {
             return NotificationData.getUserExpanded(row);
         }
         /**
-         * Return whether the entry has been manually dismissed by the user.
+         * Return whether the entry has been manually cleared by the user.
          */
-        public boolean userDismissed() {
-            return NotificationData.getUserDismissed(row);
+        public boolean userCleared() {
+            return NotificationData.getUserCleared(row);
         }
         /**
          * Set the flag indicating that this was manually expanded by the user.
@@ -234,16 +234,16 @@ public class NotificationData {
     }
 
     /**
-     * Return whether the entry was dismissed by the user.
+     * Return whether the entry was cleared by the user.
      */
-    public static boolean getUserDismissed(View row) {
-        return readBooleanTag(row, R.id.user_dismissed_tag);
+    public static boolean getUserCleared(View row) {
+        return readBooleanTag(row, R.id.user_cleared_tag);
     }
 
     /**
-     * Set whether the entry was dismissed by the user.
+     * Set whether the entry is being cleared by the user.
      */
-    public static boolean setUserDismissed(View row) {
-        return writeBooleanTag(row, R.id.user_dismissed_tag, true);
+    public static boolean setUserCleared(View row) {
+        return writeBooleanTag(row, R.id.user_cleared_tag, true);
     }
 }

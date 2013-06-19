@@ -1154,14 +1154,14 @@ public abstract class BaseStatusBar extends SystemUI implements
         updateExpansionStates();
         updateNotificationIcons();
 
-        if (CLOSE_PANEL_WHEN_EMPTIED && isNotificationPanelFullyVisible()) {
-            if (entry.userDismissed() && !mNotificationData.hasClearableItems()) {
-                mHandler.removeCallbacks(mPanelCollapseRunnable);
-                mHandler.postDelayed(mPanelCollapseRunnable, COLLAPSE_AFTER_DISMISS_DELAY);
-            } else if (mNotificationData.size() == 0) {
-                mHandler.removeCallbacks(mPanelCollapseRunnable);
-                mHandler.postDelayed(mPanelCollapseRunnable, COLLAPSE_AFTER_REMOVE_DELAY);
-            }
+        if (entry.userCleared() && !mNotificationData.hasClearableItems()) {
+            // wait a bit to make the user aware of what's happening
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+                }
+            }, 225);
         }
 
         return entry.notification;
