@@ -1918,11 +1918,6 @@
   <!-- Developer settings - Kill app back press -->
   <java-symbol type="string" name="app_killed_message" />
 
-  <!-- Privacy Guard -->
-  <java-symbol type="string" name="privacy_guard_notification" />
-  <java-symbol type="string" name="privacy_guard_notification_detail" />
-  <java-symbol type="drawable" name="stat_notify_privacy_guard" />
-
   <!-- Lockscreen -->
   <java-symbol type="bool" name="config_disableHomeUnlockSetting" />
   <java-symbol type="id" name="expand_challenge_handle" />
@@ -1943,5 +1938,13 @@
 
   <!-- Panel auto brightness -->
   <java-symbol type="integer" name="config_panelAutoBrightnessValue" />
+
+  <!-- Privacy Guard -->
+  <java-symbol type="string" name="privacy_guard_notification" />
+  <java-symbol type="string" name="privacy_guard_notification_detail" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard" />
+
+  <!-- Irda Service -->
+  <java-symbol type="bool" name="config_enableIrdaManagerService" />
 
 </resources>
