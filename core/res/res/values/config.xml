@@ -1128,61 +1128,15 @@
          where if the preferred is used we don't try the others. -->
     <bool name="config_dontPreferApn">false</bool>
 
-    <!-- Vibrator pattern to be used as the default for notifications
-         that specify DEFAULT_VIBRATE.
-     -->
-    <integer-array name="config_defaultNotificationVibePattern">
+    <!-- Vibrator pattern to be used as for notifications while alerts
+         are disabled (e.g. during phone calls) if enabled by the user.
+         -->
+    <integer-array name="config_notificationNoAlertsVibePattern">
         <item>0</item>
-        <item>350</item>
-        <item>250</item>
-        <item>350</item>
-    </integer-array>
-
-    <!-- Vibrator pattern to be used as the default for notifications
-         that do not specify vibration but vibrate anyway because the device
-         is in vibrate mode.
-     -->
-    <integer-array name="config_notificationFallbackVibePattern">
-        <item>0</item>
+        <item>50</item>
         <item>100</item>
-        <item>150</item>
-        <item>100</item>
+        <item>50</item>
     </integer-array>
-
-    <!-- Class name of the framework account picker activity.
-         Can be customized for other product types -->
-    <string name="config_chooseAccountActivity"
-            >android/android.accounts.ChooseAccountActivity</string>
-    <!-- Class name of the account type and account picker activity.
-         Can be customized for other product types -->
-    <string name="config_chooseTypeAndAccountActivity"
-            >android/android.accounts.ChooseTypeAndAccountActivity</string>
-
-    <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
-    <string name="config_appsAuthorizedForSharedAccounts">;com.android.settings;</string>
-
-    <!-- Flag indicating that the media framework should not allow changes or mute on any
-         stream or master volumes. -->
-    <bool name="config_useFixedVolume">false</bool>
-
-    <!-- The list of IMEs which should be disabled until used.
-         This function suppresses update notifications for these pre-installed apps.
-         We need to set this configuration carefully that they should not have functionarities
-         other than "IME" or "Spell Checker". In InputMethodManagerService,
-         the listed IMEs are disabled until used when all of the following conditions are met.
-         1. Not selected as an enabled IME in the Settings
-         2. Not selected as a spell checker in the Settings
-         3. Installed
-         4. A pre-installed IME
-         5. Not enabled
-         And the disabled_until_used state for an IME is released by InputMethodManagerService
-         when the IME is selected as an enabled IME. -->
-    <string-array name="config_disabledUntilUsedPreinstalledImes" translatable="false">
-        <item>com.android.inputmethod.latin</item>
-    </string-array>
-
-    <!-- Workaround for devices with broken keyboards -->
-    <bool name="config_forceDisableHardwareKeyboard">false</bool>
 
     <!-- Flag indicating if the speed up audio on mt call code should be executed -->
     <bool name="config_speed_up_audio_on_mt_calls">false</bool>
@@ -1248,8 +1202,5 @@
 
     <!-- True if the Irda service should be started at system start -->
     <bool name="config_enableIrdaManagerService">false</bool>
-
-    <!-- Integer to configure panel auto brightness mode when changed -->
-    <integer name="config_panelAutoBrightnessValue">-1</integer>
 
 </resources>
