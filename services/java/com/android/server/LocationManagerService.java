@@ -1083,15 +1083,13 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         if (records != null) {
             for (UpdateRecord record : records) {
-                if (UserHandle.getUserId(record.mReceiver.mUid) == mCurrentUserId) {
-                    if (checkLocationAccess(record.mReceiver.mUid, record.mReceiver.mPackageName,
-                            record.mReceiver.mAllowedResolutionLevel)) {
-                        LocationRequest locationRequest = record.mRequest;
-                        providerRequest.locationRequests.add(locationRequest);
-                        if (locationRequest.getInterval() < providerRequest.interval) {
-                            providerRequest.reportLocation = true;
-                            providerRequest.interval = locationRequest.getInterval();
-                        }
+                if (UserHandle.getUserId(record.mReceiver.mUid) == mCurrentUserId &&
+                        !mBlacklist.isBlacklisted(record.mReceiver.mPackageName)) {
+                    LocationRequest locationRequest = record.mRequest;
+                    providerRequest.locationRequests.add(locationRequest);
+                    if (locationRequest.getInterval() < providerRequest.interval) {
+                        providerRequest.reportLocation = true;
+                        providerRequest.interval = locationRequest.getInterval();
                     }
                 }
             }
