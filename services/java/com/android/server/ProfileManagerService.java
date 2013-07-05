@@ -36,6 +36,8 @@ import android.content.res.XmlResourceParser;
 import android.os.Environment;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiSsid;
+import android.net.wifi.WifiInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -43,6 +45,7 @@ import android.util.Log;
 import android.os.ParcelUuid;
 
 import java.util.Collection;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -60,7 +63,8 @@ public class ProfileManagerService extends IProfileManager.Stub {
 
     public static final String PERMISSION_CHANGE_SETTINGS = "android.permission.WRITE_SETTINGS";
 
-    private static final String PROFILE_FILENAME = "/data/system/profiles.xml";
+    /* package */ static final File PROFILE_FILE =
+            new File(Environment.getSystemSecureDirectory(), "profiles.xml");
 
     private Map<UUID, Profile> mProfiles;
 
@@ -79,8 +83,6 @@ public class ProfileManagerService extends IProfileManager.Stub {
     private Context mContext;
     private boolean mDirty;
     private BackupManager mBackupManager;
-    private ProfileTriggerHelper mTriggerHelper;
-
     private WifiManager mWifiManager;
     private String mLastConnectedSSID;
 
@@ -136,7 +138,8 @@ public class ProfileManagerService extends IProfileManager.Stub {
 
     public ProfileManagerService(Context context) {
         mContext = context;
-        mWifiManager = (WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);
+        mBackupManager = new BackupManager(mContext);
+        mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         mLastConnectedSSID = getActiveSSID();
 
         mWildcardGroup = new NotificationGroup(
@@ -167,7 +170,7 @@ public class ProfileManagerService extends IProfileManager.Stub {
 
         boolean init = skipFile;
 
-        if (! skipFile) {
+        if (!skipFile) {
             try {
                 loadFromFile();
             } catch (XmlPullParserException e) {
@@ -507,10 +510,10 @@ public class ProfileManagerService extends IProfileManager.Stub {
         persistIfDirty();
     }
 
-    private void loadFromFile() throws XmlPullParserException, IOException {
+    private void loadFromFile() throws RemoteException, XmlPullParserException, IOException {
         XmlPullParserFactory xppf = XmlPullParserFactory.newInstance();
         XmlPullParser xpp = xppf.newPullParser();
-        FileReader fr = new FileReader(PROFILE_FILENAME);
+        FileReader fr = new FileReader(PROFILE_FILE);
         xpp.setInput(fr);
         loadXml(xpp, mContext);
         fr.close();
@@ -539,7 +542,7 @@ public class ProfileManagerService extends IProfileManager.Stub {
                     addNotificationGroupInternal(ng);
                 }
             } else if (event == XmlPullParser.END_DOCUMENT) {
-                throw new IOException("Premature end of file while reading " + PROFILE_FILENAME);
+                throw new IOException("Premature end of file while reading " + PROFILE_FILE);
             }
             event = xpp.next();
         }
@@ -618,11 +621,15 @@ public class ProfileManagerService extends IProfileManager.Stub {
         if (dirty) {
             try {
                 Log.d(TAG, "Saving profile data...");
-                FileWriter fw = new FileWriter(PROFILE_FILENAME);
+                FileWriter fw = new FileWriter(PROFILE_FILE);
                 fw.write(getXmlString());
                 fw.close();
                 Log.d(TAG, "Save completed.");
                 mDirty = false;
+
+                long token = clearCallingIdentity();
+                mBackupManager.dataChanged();
+                restoreCallingIdentity(token);
             } catch (Throwable e) {
                 e.printStackTrace();
             }
