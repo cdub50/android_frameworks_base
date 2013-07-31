@@ -1796,6 +1796,13 @@ static status_t writeLayoutClasses(
                 } else {
                     getAttributeComment(assets, name8, &typeComment);
                 }
+<<<<<<< HEAD
+=======
+                String16 name(name8);
+                if (fixupSymbol(&name) != NO_ERROR) {
+                    hasErrors = true;
+                }
+>>>>>>> c21a3a6... leftovers
 
                 uint32_t typeSpecFlags = 0;
                 String16 name16(sym.name);
