@@ -1563,6 +1563,14 @@ public class InputMethodService extends AbstractInputMethodService {
             }
         }
     }
+ 
+    final Runnable restoreAutoRotation = new Runnable() {
+        @Override public void run() {
+            Settings.System.putInt(getContentResolver(),
+                    Settings.System.ACCELEROMETER_ROTATION, 0);
+            mForcedAutoRotate = false;
+        }
+    };
 
     final Runnable restoreAutoRotation = new Runnable() {
         @Override public void run() {

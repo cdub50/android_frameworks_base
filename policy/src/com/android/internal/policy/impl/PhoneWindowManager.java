@@ -151,6 +151,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_POWER_SHUT_OFF = 2;
     static final int LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM = 3;
 
+    // These need to match the documentation/constant in
+    // core/res/res/values/config.xml
+    static final int LONG_PRESS_HOME_NOTHING = 0;
+    static final int LONG_PRESS_HOME_RECENT_DIALOG = 1;
+    static final int LONG_PRESS_HOME_RECENT_SYSTEM_UI = 2;
+
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
     static final int APPLICATION_PANEL_SUBLAYER = 1;
@@ -533,6 +539,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mSeascapeRotation = 0;   // "other" landscape rotation, 180 degrees from mLandscapeRotation
     int mPortraitRotation = 0;   // default portrait rotation
     int mUpsideDownRotation = 0; // "other" portrait rotation
+
+    int mOverscanLeft = 0;
+    int mOverscanTop = 0;
+    int mOverscanRight = 0;
+    int mOverscanBottom = 0;
 
     // Screenshot trigger states
     // Time to volume and power must be pressed within this interval of each other.
