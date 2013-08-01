@@ -345,19 +345,8 @@ class QuickSettings {
                 showBrightnessDialog();
             }
         });
-        mModel.addBrightnessTile(brightnessTile, new QuickSettingsModel.RefreshCallback() {
-            @Override
-            public void refreshView(QuickSettingsTileView view, State state) {
-                TextView tv = (TextView) view.findViewById(R.id.brightness_textview);
-                tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
-                tv.setText(state.label);
-                tv.setTextSize(1, mTileTextSize);
-                if (mTileTextColor != -2) {
-                    tv.setTextColor(mTileTextColor);
-                }
-                dismissBrightnessDialog(mBrightnessDialogShortTimeout);
-            }
-        });
+        mModel.addBrightnessTile(brightnessTile,
+                new QuickSettingsModel.BasicRefreshCallback(brightnessTile));
         parent.addView(brightnessTile);
         mDynamicSpannedTiles.add(brightnessTile);
 
