@@ -84,6 +84,9 @@
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.ACCESS_SUPERUSER" />
 
+    <!--Halo-->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/> 
+
     <application
         android:persistent="true"
         android:allowClearUserData="false"
@@ -272,7 +275,7 @@
         <activity android:name="com.android.systemui.Transparent"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
-	    <!-- Active Display -->
+	<!-- Active Display -->
         <activity android:name=".statusbar.policy.activedisplay.DummyActivity"
                   android:label=""
                   android:taskAffinity=""

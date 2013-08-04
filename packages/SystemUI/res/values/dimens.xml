@@ -298,4 +298,5 @@
     <!-- AM/PM size in active display -->
     <dimen name="ad_ampm_font_size">32dp</dimen>
 
+    <dimen name="halo_content_max_width">250dp</dimen> 
 </resources>
