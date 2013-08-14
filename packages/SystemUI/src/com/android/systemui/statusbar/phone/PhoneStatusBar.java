@@ -235,7 +235,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     // top bar
     View mNotificationPanelHeader;
-    View mDateTimeView;
     View mClearButton;
     ImageView mSettingsButton, mQuickSettingsButton, mNotificationButton;
 
@@ -263,9 +262,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     boolean mExpandedVisible;
     private boolean mNotificationPanelIsOpen = false;
     private boolean mQSPanelIsOpen = false;
-
-    // the date view
-    DateView mDateView;
 
     // for immersive activities
     private IntruderAlertView mIntruderAlertView;
@@ -625,7 +621,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         mClearButton.setAlpha(0f);
         mClearButton.setVisibility(View.INVISIBLE);
         mClearButton.setEnabled(false);
-        mDateView = (DateView)mStatusBarWindow.findViewById(R.id.date);
 
         if (mStatusBarView.hasFullWidthNotifications()) {
             mHideSettingsPanel = Settings.System.getInt(mContext.getContentResolver(),
@@ -636,12 +631,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             mHasSettingsPanel = res.getBoolean(R.bool.config_hasSettingsPanel);
         }
         mHasFlipSettings = res.getBoolean(R.bool.config_hasFlipSettingsPanel);
-
-        mDateTimeView = mNotificationPanelHeader.findViewById(R.id.datetime);
-        if (mDateTimeView != null) {
-            mDateTimeView.setOnClickListener(mClockClickListener);
-            mDateTimeView.setEnabled(true);
-        }
 
         mSettingsButton = (ImageView) mStatusBarWindow.findViewById(R.id.settings_button);
         mSettingsButton.setOnClickListener(mSettingsButtonListener);
@@ -3026,14 +3015,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                 mPowerWidget.startAnimation(anim);
             }
             return true;
-        }
-    };
-
-    private final View.OnClickListener mClockClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            startActivityDismissingKeyguard(
-                    new Intent(Intent.ACTION_QUICK_CLOCK), true); // have fun, everyone
         }
     };
 
