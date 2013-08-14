@@ -5812,6 +5812,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
+    public void showCustomIntent(Intent intent) {
+        mKeyguardMediator.showCustomIntent(intent);
+    }
+
+    @Override
     public boolean canMagnifyWindow(int windowType) {
         switch (windowType) {
             case WindowManager.LayoutParams.TYPE_INPUT_METHOD:
