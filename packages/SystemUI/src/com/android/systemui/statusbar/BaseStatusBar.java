@@ -1458,6 +1458,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
             }
         }
+
         return false;
     }
 
@@ -1541,12 +1542,18 @@ public abstract class BaseStatusBar extends SystemUI implements
                     Settings.System.PIE_GRAVITY, Position.LEFT.FLAG);
             mPieShowTrigger = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.PIE_TRIGGER_SHOW, 0) == 1;
-            mPieTriggerSize = Settings.System.getFloat(mContext.getContentResolver(),
-                    Settings.System.PIE_TRIGGER_SIZE,
-                    mContext.getResources().getDimension(R.dimen.pie_trigger_height));
-            mPieImeIsShowing = Settings.System.getFloat(mContext.getContentResolver(),
+            mPieTriggerThickness = Settings.System.getFloat(mContext.getContentResolver(),
+                    Settings.System.PIE_TRIGGER_THICKNESS,
+                    mContext.getResources().getDimension(R.dimen.pie_trigger_thickness));
+            mPieTriggerHeight = Settings.System.getFloat(mContext.getContentResolver(),
+                    Settings.System.PIE_TRIGGER_HEIGHT,
+                    0.8f);
+            mPieTriggerGravityLeftRight = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.PIE_TRIGGER_GRAVITY_LEFT_RIGHT,
+                    Gravity.CENTER_VERTICAL);
+            mPieImeIsShowing = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.PIE_SOFTKEYBOARD_IS_SHOWING, 0) == 1
-                    && Settings.System.getFloat(mContext.getContentResolver(),
+                    && Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.PIE_ADJUST_TRIGGER_FOR_IME, 1) == 1;
             attachPie();
         }
