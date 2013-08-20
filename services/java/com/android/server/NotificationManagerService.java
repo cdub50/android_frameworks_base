@@ -180,6 +180,21 @@ public class NotificationManagerService extends INotificationManager.Stub
     private ArrayList<NotificationRecord> mLights = new ArrayList<NotificationRecord>();
     private NotificationRecord mLedNotification;
 
+    private boolean mQuietHoursEnabled = false;
+    // Minutes from midnight when quiet hours begin.
+    private int mQuietHoursStart = 0;
+    // Minutes from midnight when quiet hours end.
+    private int mQuietHoursEnd = 0;
+    // Don't play sounds.
+    private boolean mQuietHoursMute = true;
+    // Don't vibrate.
+    private boolean mQuietHoursStill = true;
+    // Dim LED if hardware supports it.
+    private boolean mQuietHoursDim = true;
+
+    private HashMap<String, Long> mAnnoyingNotifications = new HashMap<String, Long>();
+    private long mAnnoyingNotificationThreshold = -1;
+
     private final AppOpsManager mAppOps;
 
     // contains connections to all connected listeners, including app services
@@ -1877,7 +1892,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             boolean readyForAlerts = canInterrupt
                     && mSystemReady
                     && !notificationIsAnnoying(pkg)
-                    && (r.userId == UserHandle.USER_ALL || (r.userId == userId && r.userId == currentUser))
+                    && (r.getUserId() == UserHandle.USER_ALL || r.getUserId() == userId && r.getUserId() == currentUser)
                     && (old == null || (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) == 0);
             boolean hasValidSound = false;
 
@@ -2011,6 +2026,25 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
 
         idOut[0] = id;
+    }
+
+    private boolean notificationIsAnnoying(String pkg) {
+        if (mAnnoyingNotificationThreshold <= 0)
+            return false;
+
+        if("android".equals(pkg))
+            return false;
+
+        long currentTime = System.currentTimeMillis();
+        if (mAnnoyingNotifications.containsKey(pkg)
+                && (currentTime - mAnnoyingNotifications.get(pkg) < mAnnoyingNotificationThreshold)) {
+            // less than threshold; it's an annoying notification!!
+            return true;
+        } else {
+            // not in map or time to re-add
+            mAnnoyingNotifications.put(pkg, currentTime);
+            return false;
+        }
     }
 
     private boolean shouldConvertSoundToVibration() {
