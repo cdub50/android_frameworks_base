@@ -128,8 +128,10 @@ public abstract class BaseStatusBar extends SystemUI implements
     private WidgetView mWidgetView;
 
     private boolean mPieShowTrigger = false;
-    private boolean mDisableTriggers = false;
-    private float mPieTriggerSize;
+    private boolean mForceBottomTrigger = false;
+    private float mPieTriggerThickness;
+    private float mPieTriggerHeight;
+    private int mPieTriggerGravityLeftRight;
 
     private boolean mPieImeIsShowing = false;
 
@@ -1547,7 +1549,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     mContext.getResources().getDimension(R.dimen.pie_trigger_thickness));
             mPieTriggerHeight = Settings.System.getFloat(mContext.getContentResolver(),
                     Settings.System.PIE_TRIGGER_HEIGHT,
-                    0.8f);
+                    0.7f);
             mPieTriggerGravityLeftRight = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.PIE_TRIGGER_GRAVITY_LEFT_RIGHT,
                     Gravity.CENTER_VERTICAL);
@@ -1622,9 +1624,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    public void disableTriggers(boolean disableTriggers) {
+    public void keyguardTriggers(boolean forceBottomTrigger) {
         if (isPieEnabled()) {
-            mDisableTriggers = disableTriggers;
+            mForceBottomTrigger = forceBottomTrigger;
             setupTriggers(false);
         }
     }
@@ -1636,10 +1638,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void setupTriggers(boolean forceDisableBottomAndTopTrigger) {
-            if (mDisableTriggers) {
-                updatePieTriggerMask(0);
-                return;
-            }
             mForceDisableBottomAndTopTrigger = forceDisableBottomAndTopTrigger;
 
             // get expanded desktop values
@@ -1686,6 +1684,16 @@ public abstract class BaseStatusBar extends SystemUI implements
             hasNavigationBar = (hasNavigationBar && isScreenPortrait() && navigationBarHeight)
                                 || (hasNavigationBar && !isScreenPortrait() && !navBarCanMove
                                     && navigationBarHeightLandscape);
+
+            if ((mForceBottomTrigger && !hasNavigationBar
+                    || mForceBottomTrigger && disableRightTriggerForNavbar)
+                && !mForceDisableBottomAndTopTrigger) {
+                    updatePieTriggerMask(Position.BOTTOM.FLAG);
+                return;
+            } else if (mForceBottomTrigger && hasNavigationBar) {
+                    updatePieTriggerMask(0);
+                return;
+            }
 
             // let's set the triggers
             if ((!expanded && hasNavigationBar && !autoHideStatusBar)
