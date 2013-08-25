@@ -2863,6 +2863,13 @@ public final class Settings {
         public static final String QUICK_SETTINGS_TILE_CONTENT = "quick_settings_tile_content";
 
         /**
+         * Animate-flip Quick Settings Panel Tiles on click
+         *
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_TILES_FLIP = "quick_settings_tiles_flip";
+
+        /**
          * Quick Settings Panel Dynamic Tiles
          *
          * @hide
