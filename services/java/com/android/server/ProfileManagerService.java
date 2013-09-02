@@ -26,12 +26,12 @@ import android.app.Profile;
 import android.app.ProfileGroup;
 import android.app.ProfileManager;
 import android.app.backup.BackupManager;
-import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.XmlResourceParser;
+import android.os.Environment;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -71,6 +71,8 @@ public class ProfileManagerService extends IProfileManager.Stub {
 
     private Context mContext;
     private boolean mDirty;
+    private BackupManager mBackupManager;
+    private ProfileTriggerHelper mTriggerHelper;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -88,6 +90,8 @@ public class ProfileManagerService extends IProfileManager.Stub {
 
     public ProfileManagerService(Context context) {
         mContext = context;
+        mBackupManager = new BackupManager(mContext);
+        mTriggerHelper = new ProfileTriggerHelper(mContext, this);
 
         mWildcardGroup = new NotificationGroup(
                 context.getString(com.android.internal.R.string.wildcardProfile),
@@ -176,7 +180,7 @@ public class ProfileManagerService extends IProfileManager.Stub {
         }
     }
 
-    private boolean setActiveProfile(Profile newActiveProfile, boolean doinit) throws RemoteException {
+    /* package */ boolean setActiveProfile(Profile newActiveProfile, boolean doinit) throws RemoteException {
         /*
          * NOTE: Since this is not a public function, and all public functions
          * take either a string or a UUID, the active profile should always be
