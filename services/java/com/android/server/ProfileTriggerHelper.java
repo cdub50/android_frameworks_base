@@ -25,6 +25,10 @@ import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiSsid;
 import android.net.wifi.WifiInfo;
+<<<<<<< HEAD
+=======
+import android.os.RemoteException;
+>>>>>>> 69ddd0d... Factor out profile trigger code into separate class.
 import android.util.Log;
 
 import java.util.UUID;
@@ -78,6 +82,7 @@ public class ProfileTriggerHelper extends BroadcastReceiver {
     }
 
     private void checkTriggers(int type, String id, int newState) {
+<<<<<<< HEAD
         for (Profile p : mService.getProfileList()) {
             if (newState != p.getTrigger(type, id)) {
                 continue;
@@ -87,6 +92,21 @@ public class ProfileTriggerHelper extends BroadcastReceiver {
             if (!currentProfileUuid.equals(p.getUuid())) {
                 mService.setActiveProfile(p, true);
             }
+=======
+        try {
+            for (Profile p : mService.getProfiles()) {
+                if (newState != p.getTrigger(type, id)) {
+                    continue;
+                }
+
+                UUID currentProfileUuid = mService.getActiveProfile().getUuid();
+                if (!currentProfileUuid.equals(p.getUuid())) {
+                    mService.setActiveProfile(p, true);
+                }
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not update profile on trigger", e);
+>>>>>>> 69ddd0d... Factor out profile trigger code into separate class.
         }
     }
 
