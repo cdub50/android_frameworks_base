@@ -58,15 +58,6 @@ public class ProfileManagerService extends IProfileManager.Stub {
     // Enable the below for detailed logging of this class
     private static final boolean LOCAL_LOGV = false;
 
-    /**
-    * <p>Broadcast Action: Current profile has been updated. This is triggered every time the
-    * currently active profile is updated, instead of selected.</p>
-    * <p> For instance, this includes profile updates caused by a locale change, which doesn't
-    * trigger a profile selection, but causes its name to change.</p>
-    * @hide
-    */
-    public static final String INTENT_ACTION_PROFILE_UPDATED = "android.intent.action.PROFILE_UPDATED";
-
     public static final String PERMISSION_CHANGE_SETTINGS = "android.permission.WRITE_SETTINGS";
 
     /* package */ static final File PROFILE_FILE =
@@ -221,7 +212,7 @@ public class ProfileManagerService extends IProfileManager.Stub {
                 mActiveProfile.doSelect(mContext);
 
                 // Notify other applications of newly selected profile.
-                Intent broadcast = new Intent(INTENT_ACTION_PROFILE_SELECTED);
+                Intent broadcast = new Intent(ProfileManager.INTENT_ACTION_PROFILE_SELECTED);
                 broadcast.putExtra("name", mActiveProfile.getName());
                 broadcast.putExtra("uuid", mActiveProfile.getUuid().toString());
                 broadcast.putExtra("lastName", lastProfile.getName());
@@ -234,7 +225,7 @@ public class ProfileManagerService extends IProfileManager.Stub {
                     ActivityManagerNative.isSystemReady()) {
                 // Something definitely changed: notify.
                 long token = clearCallingIdentity();
-                Intent broadcast = new Intent(INTENT_ACTION_PROFILE_UPDATED);
+                Intent broadcast = new Intent(ProfileManager.INTENT_ACTION_PROFILE_UPDATED);
                 broadcast.putExtra("name", mActiveProfile.getName());
                 broadcast.putExtra("uuid", mActiveProfile.getUuid().toString());
                 mContext.sendBroadcastAsUser(broadcast, UserHandle.ALL);
