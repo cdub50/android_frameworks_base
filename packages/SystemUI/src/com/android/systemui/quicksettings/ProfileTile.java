@@ -28,7 +28,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
-import com.android.server.ProfileManagerService;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 import com.android.systemui.statusbar.phone.QuickSettingsController;
@@ -44,7 +43,8 @@ public class ProfileTile extends QuickSettingsTile {
             QuickSettingsController qsc) {
         super(context, inflater, container, qsc);
 
-        qsc.registerAction(ProfileManagerService.INTENT_ACTION_PROFILE_SELECTED, this);
+        qsc.registerAction(ProfileManager.INTENT_ACTION_PROFILE_SELECTED, this);
+        qsc.registerAction(ProfileManager.INTENT_ACTION_PROFILE_UPDATED, this);
 
         mProfileManager = (ProfileManager) mContext.getSystemService(Context.PROFILE_SERVICE);
         mDrawable = R.drawable.ic_qs_profiles;
@@ -120,5 +120,4 @@ public class ProfileTile extends QuickSettingsTile {
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
         dialog.show();
     }
-
 }

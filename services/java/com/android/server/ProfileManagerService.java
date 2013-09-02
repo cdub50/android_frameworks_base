@@ -24,6 +24,9 @@ import android.app.IProfileManager;
 import android.app.NotificationGroup;
 import android.app.Profile;
 import android.app.ProfileGroup;
+import android.app.ProfileManager;
+import android.app.backup.BackupManager;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -45,20 +48,13 @@ import java.util.UUID;
 
 /** {@hide} */
 public class ProfileManagerService extends IProfileManager.Stub {
+    private static final String TAG = "ProfileService";
     // Enable the below for detailed logging of this class
     private static final boolean LOCAL_LOGV = false;
-    /**
-     * <p>Broadcast Action: A new profile has been selected. This can be triggered by the user
-     * or by calls to the ProfileManagerService / Profile.</p>
-     * @hide
-     */
-    public static final String INTENT_ACTION_PROFILE_SELECTED = "android.intent.action.PROFILE_SELECTED";
 
     public static final String PERMISSION_CHANGE_SETTINGS = "android.permission.WRITE_SETTINGS";
 
     private static final String PROFILE_FILENAME = "/data/system/profiles.xml";
-
-    private static final String TAG = "ProfileService";
 
     private Map<UUID, Profile> mProfiles;
 
@@ -209,7 +205,7 @@ public class ProfileManagerService extends IProfileManager.Stub {
                 mActiveProfile.doSelect(mContext);
 
                 // Notify other applications of newly selected profile.
-                Intent broadcast = new Intent(INTENT_ACTION_PROFILE_SELECTED);
+                Intent broadcast = new Intent(ProfileManager.INTENT_ACTION_PROFILE_SELECTED);
                 broadcast.putExtra("name", mActiveProfile.getName());
                 broadcast.putExtra("uuid", mActiveProfile.getUuid().toString());
                 broadcast.putExtra("lastName", lastProfile.getName());
@@ -218,6 +214,15 @@ public class ProfileManagerService extends IProfileManager.Stub {
 
                 restoreCallingIdentity(token);
                 persistIfDirty();
+            } else if (lastProfile != mActiveProfile &&
+                    ActivityManagerNative.isSystemReady()) {
+                // Something definitely changed: notify.
+                long token = clearCallingIdentity();
+                Intent broadcast = new Intent(ProfileManager.INTENT_ACTION_PROFILE_UPDATED);
+                broadcast.putExtra("name", mActiveProfile.getName());
+                broadcast.putExtra("uuid", mActiveProfile.getUuid().toString());
+                mContext.sendBroadcastAsUser(broadcast, UserHandle.ALL);
+                restoreCallingIdentity(token);
             }
             return true;
         } catch (Exception ex) {
