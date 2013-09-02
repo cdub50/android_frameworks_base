@@ -42,7 +42,6 @@ import android.util.Log;
 import android.os.ParcelUuid;
 
 import java.util.Collection;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -183,7 +182,7 @@ public class ProfileManagerService extends IProfileManager.Stub {
         return true;
     }
 
-    /* package */ boolean setActiveProfile(Profile newActiveProfile, boolean doinit) throws RemoteException {
+    /* package */ void setActiveProfile(Profile newActiveProfile, boolean doInit) {
         /*
          * NOTE: Since this is not a public function, and all public functions
          * take either a string or a UUID, the active profile should always be
@@ -192,49 +191,54 @@ public class ProfileManagerService extends IProfileManager.Stub {
          * list, and THEN add it.
          */
 
-        try {
-            enforceChangePermissions();
-            Log.d(TAG, "Set active profile to: " + newActiveProfile.getUuid().toString() + " - " + newActiveProfile.getName());
-            Profile lastProfile = mActiveProfile;
-            mActiveProfile = newActiveProfile;
-            mDirty = true;
-            if (doinit) {
-                if (LOCAL_LOGV) Log.v(TAG, "setActiveProfile(Profile, boolean) - Running init");
+        enforceChangePermissions();
 
-                /*
-                 * We need to clear the caller's identity in order to
-                 * - allow the profile switch to execute actions not included in the caller's permissions
-                 * - broadcast INTENT_ACTION_PROFILE_SELECTED
-                 */
-                long token = clearCallingIdentity();
+        Log.d(TAG, "Set active profile to: " + newActiveProfile.getUuid().toString()
+                + " - " + newActiveProfile.getName());
 
-                // Call profile's "doSelect"
-                mActiveProfile.doSelect(mContext);
+        Profile lastProfile = mActiveProfile;
+        mActiveProfile = newActiveProfile;
+        mDirty = true;
 
-                // Notify other applications of newly selected profile.
-                Intent broadcast = new Intent(ProfileManager.INTENT_ACTION_PROFILE_SELECTED);
-                broadcast.putExtra("name", mActiveProfile.getName());
-                broadcast.putExtra("uuid", mActiveProfile.getUuid().toString());
-                broadcast.putExtra("lastName", lastProfile.getName());
-                broadcast.putExtra("lastUuid", lastProfile.getUuid().toString());
-                mContext.sendBroadcastAsUser(broadcast, UserHandle.ALL);
+        if (doInit) {
+            if (LOCAL_LOGV) Log.v(TAG, "setActiveProfile(Profile, boolean) - Running init");
 
-                restoreCallingIdentity(token);
-                persistIfDirty();
-            } else if (lastProfile != mActiveProfile &&
-                    ActivityManagerNative.isSystemReady()) {
-                // Something definitely changed: notify.
-                long token = clearCallingIdentity();
-                Intent broadcast = new Intent(ProfileManager.INTENT_ACTION_PROFILE_UPDATED);
-                broadcast.putExtra("name", mActiveProfile.getName());
-                broadcast.putExtra("uuid", mActiveProfile.getUuid().toString());
-                mContext.sendBroadcastAsUser(broadcast, UserHandle.ALL);
-                restoreCallingIdentity(token);
-            }
-            return true;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return false;
+            /*
+             * We need to clear the caller's identity in order to
+             * - allow the profile switch to execute actions
+             *   not included in the caller's permissions
+             * - broadcast INTENT_ACTION_PROFILE_SELECTED
+             */
+            long token = clearCallingIdentity();
+
+            // Call profile's "doSelect"
+            mActiveProfile.doSelect(mContext);
+
+            // Notify other applications of newly selected profile.
+            Intent broadcast = new Intent(ProfileManager.INTENT_ACTION_PROFILE_SELECTED);
+            broadcast.putExtra(ProfileManager.EXTRA_PROFILE_NAME,
+                    mActiveProfile.getName());
+            broadcast.putExtra(ProfileManager.EXTRA_PROFILE_UUID,
+                    mActiveProfile.getUuid().toString());
+            broadcast.putExtra(ProfileManager.EXTRA_LAST_PROFILE_NAME,
+                    lastProfile.getName());
+            broadcast.putExtra(ProfileManager.EXTRA_LAST_PROFILE_UUID,
+                    lastProfile.getUuid().toString());
+
+            mContext.sendBroadcastAsUser(broadcast, UserHandle.ALL);
+
+            restoreCallingIdentity(token);
+            persistIfDirty();
+        } else if (lastProfile != mActiveProfile && ActivityManagerNative.isSystemReady()) {
+            // Something definitely changed: notify.
+            long token = clearCallingIdentity();
+            Intent broadcast = new Intent(ProfileManager.INTENT_ACTION_PROFILE_UPDATED);
+            broadcast.putExtra(ProfileManager.EXTRA_PROFILE_NAME,
+                    mActiveProfile.getName());
+            broadcast.putExtra(ProfileManager.EXTRA_PROFILE_UUID,
+                    mActiveProfile.getUuid().toString());
+            mContext.sendBroadcastAsUser(broadcast, UserHandle.ALL);
+            restoreCallingIdentity(token);
         }
     }
 
@@ -456,7 +460,7 @@ public class ProfileManagerService extends IProfileManager.Stub {
         persistIfDirty();
     }
 
-    private void loadFromFile() throws RemoteException, XmlPullParserException, IOException {
+    private void loadFromFile() throws XmlPullParserException, IOException {
         XmlPullParserFactory xppf = XmlPullParserFactory.newInstance();
         XmlPullParser xpp = xppf.newPullParser();
         FileReader fr = new FileReader(PROFILE_FILE);
