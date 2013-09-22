@@ -2916,14 +2916,14 @@ public final class Settings {
          */
         public static final String QS_DYNAMIC_WIFI = "qs_dyanmic_wifi";
 
-         /**
+        /**
          * Quick Settings Quick Pulldown
          *
          * @hide
          */
         public static final String QS_QUICK_PULLDOWN = "qs_quick_pulldown";
 
-         /**
+        /**
          * Quick Settings Quick Pulldown if no notifications are present
          *
          * @hide
@@ -4234,8 +4234,7 @@ public final class Settings {
         public static final String ACTIVE_DISPLAY_SHOW_DATE = "active_display_show_date";
 
         /**
-         * Choose side for Clear button on Recents window
-         * 0 = left, 1 = right
+         * Choose position of clear button on recents window
          * @hide
          */
         public static final String CLEAR_RECENTS_POSITION = "clear_recents_position";
