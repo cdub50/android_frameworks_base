@@ -320,6 +320,22 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         mSettingsObserver = new SettingsObserver(mHandler);
     }
 
+    @Override
+    protected void onAttachedToWindow () {
+        super.onAttachedToWindow();
+        final ViewRootImpl root = getViewRootImpl();
+        if (root != null) {
+            root.setDrawDuringWindowsAnimating(true);
+        }
+        mSettingsObserver.observe(); // observe will call updateSettings()
+    }
+
+    @Override
+    protected void onDetachedFromWindow () {
+        mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
+        super.onDetachedFromWindow();
+    }
+
     public int numItemsInOneScreenful() {
         if (mRecentsContainer instanceof RecentsScrollView){
             RecentsScrollView scrollView
@@ -404,39 +420,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             mRecentsNoApps.setAlpha(1f);
             mRecentsNoApps.setVisibility(noApps ? View.VISIBLE : View.INVISIBLE);
 
-            switch (mClearPosition) {
-                case CLEAR_DISABLE:
-                    mClearRecentsBR.setVisibility(View.GONE);
-                    mClearRecentsBL.setVisibility(View.GONE);
-                    mClearRecentsTR.setVisibility(View.GONE);
-                    mClearRecentsTL.setVisibility(View.GONE);
-                    break;
-                case CLEAR_BOTTOM_RIGHT:
-                    mClearRecentsBR.setVisibility(noApps ? View.GONE : View.VISIBLE);
-                    mClearRecentsBL.setVisibility(View.GONE);
-                    mClearRecentsTR.setVisibility(View.GONE);
-                    mClearRecentsTL.setVisibility(View.GONE);
-                    break;
-                case CLEAR_BOTTOM_LEFT:
-                    mClearRecentsBR.setVisibility(View.GONE);
-                    mClearRecentsBL.setVisibility(noApps ? View.GONE : View.VISIBLE);
-                    mClearRecentsTR.setVisibility(View.GONE);
-                    mClearRecentsTL.setVisibility(View.GONE);
-                    break;
-                case CLEAR_TOP_RIGHT:
-                    mClearRecentsBR.setVisibility(View.GONE);
-                    mClearRecentsBL.setVisibility(View.GONE);
-                    mClearRecentsTR.setVisibility(noApps ? View.GONE : View.VISIBLE);
-                    mClearRecentsTL.setVisibility(View.GONE);
-                    break;
-                case CLEAR_TOP_LEFT:
-                    mClearRecentsBR.setVisibility(View.GONE);
-                    mClearRecentsBL.setVisibility(View.GONE);
-                    mClearRecentsTR.setVisibility(View.GONE);
-                    mClearRecentsTL.setVisibility(noApps ? View.GONE : View.VISIBLE);
-                    break;
-            }
-
             onAnimationEnd(null);
             setFocusable(true);
             setFocusableInTouchMode(true);
@@ -449,21 +432,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 mPopup.dismiss();
             }
         }
-    }
-
-    protected void onAttachedToWindow () {
-        super.onAttachedToWindow();
-        final ViewRootImpl root = getViewRootImpl();
-        if (root != null) {
-            root.setDrawDuringWindowsAnimating(true);
-        }
-        mSettingsObserver.observe(); // observe will call updateSettings()
-    }
-
-    @Override
-    protected void onDetachedFromWindow () {
-        mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
-        super.onDetachedFromWindow();
     }
 
     public void onUiHidden() {
@@ -1192,5 +1160,40 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     public void updateSettings() {
         mClearPosition = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.CLEAR_RECENTS_POSITION, 1);
+        boolean noApps = mRecentTaskDescriptions != null
+                    && (mRecentTaskDescriptions.size() == 0);
+
+        switch (mClearPosition) {
+            case CLEAR_DISABLE:
+            mClearRecentsBR.setVisibility(View.GONE);
+            mClearRecentsBL.setVisibility(View.GONE);
+            mClearRecentsTR.setVisibility(View.GONE);
+            mClearRecentsTL.setVisibility(View.GONE);
+                break;
+            case CLEAR_BOTTOM_RIGHT:
+            mClearRecentsBR.setVisibility(noApps ? View.GONE : View.VISIBLE);
+            mClearRecentsBL.setVisibility(View.GONE);
+            mClearRecentsTR.setVisibility(View.GONE);
+            mClearRecentsTL.setVisibility(View.GONE);
+                break;
+            case CLEAR_BOTTOM_LEFT:
+            mClearRecentsBR.setVisibility(View.GONE);
+            mClearRecentsBL.setVisibility(noApps ? View.GONE : View.VISIBLE);
+            mClearRecentsTR.setVisibility(View.GONE);
+            mClearRecentsTL.setVisibility(View.GONE);
+                break;
+            case CLEAR_TOP_RIGHT:
+            mClearRecentsBR.setVisibility(View.GONE);
+            mClearRecentsBL.setVisibility(View.GONE);
+            mClearRecentsTR.setVisibility(noApps ? View.GONE : View.VISIBLE);
+            mClearRecentsTL.setVisibility(View.GONE);
+                break;
+            case CLEAR_TOP_LEFT:
+            mClearRecentsBR.setVisibility(View.GONE);
+            mClearRecentsBL.setVisibility(View.GONE);
+            mClearRecentsTR.setVisibility(View.GONE);
+            mClearRecentsTL.setVisibility(noApps ? View.GONE : View.VISIBLE);
+                break;
+        }
     }
 }
