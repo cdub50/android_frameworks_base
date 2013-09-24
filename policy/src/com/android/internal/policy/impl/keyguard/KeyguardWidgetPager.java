@@ -25,6 +25,7 @@ import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
+import android.content.ContentResolver; 
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.text.format.DateFormat;
@@ -617,7 +618,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             KeyguardWidgetFrame child = getWidgetPageAt(i);
             if (i != mCurrentPage) {
                 if (Settings.System.getInt(getContext().getContentResolver(),
-                        Settings.System.LOCKSCREEN_DISABLE_HINTS, 0) == 0) {
+                        Settings.System.LOCKSCREEN_HIDE_INITIAL_PAGE_HINTS, 1) == 0) {
                     child.fadeFrame(this, true, KeyguardWidgetFrame.OUTLINE_ALPHA_MULTIPLIER,
                             CHILDREN_OUTLINE_FADE_IN_DURATION);
                 } 

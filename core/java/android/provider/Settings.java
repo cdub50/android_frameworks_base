@@ -3872,6 +3872,12 @@ public final class Settings {
         public static final String LOCKSCREEN_MAXIMIZE_WIDGETS = "lockscreen_maximize_widgets";
 
         /**
+         * Wether the hints for the left and right widgets are shown when the screen is turned on
+         * @hide
+         */
+        public static final String LOCKSCREEN_HIDE_INITIAL_PAGE_HINTS = "lockscreen_hide_initial_page_hints";
+
+        /**
          * @hide
          */
         public static final String LOCKSCREEN_ALL_WIDGETS = "lockscreen_all_widgets";
