@@ -231,6 +231,15 @@ public class PackageInfo implements Parcelable {
      */
     public ThemeInfo [] themeInfos;
 
+    /** @hide */
+    public boolean requiredForAllUsers;
+
+    /** @hide */
+    public String restrictedAccountType;
+
+    /** @hide */
+    public String requiredAccountType;
+
     public PackageInfo() {
     }
 
