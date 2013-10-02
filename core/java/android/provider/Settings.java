@@ -287,7 +287,7 @@ public final class Settings {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_SHORTCUTS_SETTINGS =
-            "android.settings.slim.notificationshortcuts.NOTIFICATION_SHORTCUTS";
+            "android.settings.liquid.notificationshortcut.NOTIFICATION_SHORTCUTS";
 
     /**
      * Activity Action: Show settings to allow configuration of locale.
@@ -1799,13 +1799,6 @@ public final class Settings {
         public static final String AUTO_BRIGHTNESS_BACKLIGHT = "auto_brightness_backlight";
 
         /**
-         * Touch Key Light Duration
-         *
-         * @hide
-         */
-        public static final String TOUCHKEY_LIGHT_DUR = "touchkey_light_dir";
-
-        /**
          * Correction factor for auto-brightness adjustment light sensor
          * debounce times.
          * Smaller factors will make the adjustment more responsive, but might
@@ -1863,30 +1856,11 @@ public final class Settings {
         public static final int VOLUME_OVERLAY_NONE = 3;
 
         /**
-         * Ability to enable/disable Daul pane prefs.
-         * @hide
-         */
-        public static final String DUAL_PANE_PREFS = "dual_pane_prefs";
-
-        /**
-         * NFC polling mode configuration key
-         *
-         * @hide
-         */
-        public static final String NFC_POLLING_MODE = "nfc_polling_mode";
-
-        /**
          * Volume Adjust Sounds Enable, This is the noise made when using volume hard buttons
          * Defaults to 1 - sounds enabled
          * @hide
          */
         public static final String VOLUME_ADJUST_SOUNDS_ENABLED = "volume_adjust_sounds_enabled";
-
-        /**
-         * Lock Volume Keys, Whether to lock ringer volume changes in silent mode.
-         * @hide
-         */
-        public static final String LOCK_VOLUME_KEYS = "lock_volume_keys";
 
         /**
          * Determines which streams are affected by ringer mode changes. The
@@ -2550,26 +2524,6 @@ public final class Settings {
          * @hide
          */
         public static final String LOCKSCREEN_TARGETS = "lockscreen_targets";
-
-        /**
-         * Wheter phone lockscreen uses 5 or 8 targets
-         * @hide
-         */
-        public static final String LOCKSCREEN_EIGHT_TARGETS = "lockscreen_eight_targets";
-
-        /**
-         * Defines the shortcuts to be shown on lockscreen
-         * Usage is like this: target|icon|target|icon|target|icon
-         * if icon is not set, default application icon will be used
-         * @hide
-         */
-        public static final String LOCKSCREEN_SHORTCUTS_CONFIG = "lockscreen_shortcuts_config";
-
-        /**
-         * Whether shorcuts open with normal or longpress
-         * @hide
-         */
-        public static final String LOCKSCREEN_SHORTCUTS_LONGPRESS = "lockscreen_shortcuts_longpress";
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#LOW_BATTERY_SOUND}
@@ -3929,11 +3883,6 @@ public final class Settings {
         public static final String LOCKSCREEN_USE_WIDGET_CONTAINER_CAROUSEL = "lockscreen_use_widget_container_carousel";
 
         /**
-         * @hide
-         */
-        public static final String LARGE_RECENT_THUMBS = "large_recent_thumbs";
-
-        /**
          * Notifications Expand Behavior
          * @hide
          */
@@ -3966,10 +3915,213 @@ public final class Settings {
         public static final String VOLUME_KEYS_CONTROL_RING_STREAM = "volume_keys_control_ring_stream";
 
         /**
+         * Wheter phone lockscreen uses 5 or 8 targets
          * @hide
+         */
+        public static final String LOCKSCREEN_EIGHT_TARGETS = "lockscreen_eight_targets";
+
+        /**
+         * Defines the shortcuts to be shown on lockscreen
+         * Usage is like this: target|icon|target|icon|target|icon
+         * if icon is not set, default application icon will be used
+         * @hide
+         */
+        public static final String LOCKSCREEN_SHORTCUTS_CONFIG = "lockscreen_shortcuts_config";
+
+        /**
+         * Whether shorcuts open with normal or longpress
+         * @hide
+         */
+        public static final String LOCKSCREEN_SHORTCUTS_LONGPRESS = "lockscreen_shortcuts_longpress";
+
+        /**
+         * Whether music controls should be shown on the lockscreen if a supporting
+         * music player is active.
+         * @hide
+         */
+        public static final String LOCKSCREEN_MUSIC_CONTROLS = "lockscreen_music_controls";
+
+        /**
+         * Touch Key Light Duration
+         *
+         * @hide
+         */
+        public static final String TOUCHKEY_LIGHT_DUR = "touchkey_light_dir";
+
+        /**
+         * Ability to enable/disable Daul pane prefs.
+         * @hide
+         */
+        public static final String DUAL_PANE_PREFS = "dual_pane_prefs";
+
+        /**
+         * NFC polling mode configuration key
+         *
+         * @hide
+         */
+        public static final String NFC_POLLING_MODE = "nfc_polling_mode";
+
+        /**
+         * Lock Volume Keys, Whether to lock ringer volume changes in silent mode.
+         * @hide
+         */
+        public static final String LOCK_VOLUME_KEYS = "lock_volume_keys";
+
+
+        /**
+         * Hide carrier information on notification drawer
+         * @hide
+         */
+        public static final String NOTIFICATION_HIDE_CARRIER = "notification_hide_carrier";
+
+        /**
+         * @hide
+         * Show Wifi network name in notification shade
+         * 0 - don't show
+         * 1 - show
+         */
+        public static final String NOTIFICATION_SHOW_WIFI_SSID = "notification_show_wifi_ssid";
+
+        /**
+        * Sets the portrait background of notification drawer
+        * @hide
+        */
+        public static final String NOTIFICATION_BACKGROUND = "notification_background";
+
+        /**
+        * Sets the landscape background of notification drawer
+        * @hide
+        */
+        public static final String NOTIFICATION_BACKGROUND_LANDSCAPE = "notification_background_landscape";
+
+        /**
+        * Sets the alpha (transparency) of notification wallpaper
+        * @hide
+        */
+        public static final String NOTIF_WALLPAPER_ALPHA = "notif_wallpaper_alpha";
+
+        /**
+        * Sets the alpha (transparency) of notifications
+        * @hide
+        */
+        public static final String NOTIF_ALPHA = "notif_alpha";
+
+        /**
+         * Sets transparency of statusbar
+         * @hide
+         */
+        public static final String STATUS_BAR_ALPHA = "status_bar_alpha";
+
+        /**
+         * Sets transparency mode of status and navigation bar
+         * 0 = only home, 1 = keyguard and home (default)
+         * @hide
+         */
+        public static final String STATUS_NAV_BAR_ALPHA_MODE = "status_nav_bar_alpha_mode";
+
+        /**
+         * Sets color mode of status and navigation bar
+         * 0 = colorize always, 1 = colorize on keyguard and home (default)
+         * @hide
+         */
+        public static final String STATUS_NAV_BAR_COLOR_MODE = "status_nav_bar_color_mode";
+
+        /**
+         * Sets color of statusbar
+         * @hide
+         */
+        public static final String STATUS_BAR_COLOR = "status_bar_color";
+
+        /**
+         * @hide
+         */
+        public static final String STATUS_BAR_BRIGHTNESS_SLIDER = "statusbar_brightness_slider";
+
+        /**
+         * @hide
+         */
+        public static final String STATUSBAR_TOGGLES_BRIGHTNESS_LOC = "statusbar_toggles_brightness_loc";
+
+        /**
+         * toggle to "fix" the following: (found in NotificationManagerService)
+         *  new in 4.2: if there was supposed to be a sound and we're in vibrate mode,
+         *  we always vibrate, even if no vibration was specified
+         * @hide
+         */
+        public static final String NOTIFICATION_CONVERT_SOUND_TO_VIBRATION = "convert_sound_to_vibration";
+
+        /**
+         * Whether to allow notification vibration while notification alerts are disabled
+         * (e.g. during phone calls). The vibration pattern to be used will be a subtle one;
+         * custom vibration is disabled at that point.
+         * @hide
+         */
+        public static final String NOTIFICATION_VIBRATE_DURING_ALERTS_DISABLED = "vibrate_while_no_alerts";
+
+        /**
+         * Stores values for notification shortcut targets
+         * @hide
+         */
+        public static final String NOTIFICATION_SHORTCUTS_CONFIG = "notification_shortcuts_config";
+
+        /**
+         * Stores the value for notification shortcuts icon color
+         * @hide
+         */
+        public static final String NOTIFICATION_SHORTCUTS_COLOR = "notification_shortcuts_color";
+
+        /**
+         * Whether to colorize the default application icons
+         * @hide
+         */
+        public static final String NOTIFICATION_SHORTCUTS_COLOR_MODE = "notification_shortcuts_color_mode";
+
+        /**
+         * How long to wait between playing notification sounds from a package
+         * Should be in milliseconds. 0 to disable
+         * @hide
+         */
+        public static final String MUTE_ANNOYING_NOTIFICATIONS_THRESHOLD = "mute_annoying_notifications_threshold";
+
+        /**
+         * ListView Animations
+         * 0 == None
+         * 1 == Wave (Left)
+         * 2 == Wave (Right)
+         * 3 == Scale
+         * 4 == Alpha
+         * 5 == Stack (Top)
+         * 6 == Stack (Bottom)
+         * 7 == Translate (Left)
+         * 8 == Translate (Right)
+         * @hide
+         */
+         public static final String LISTVIEW_ANIMATION = "listview_animation";
+
+        /**
+         * ListView Interpolators
+         * 0 == None
+         * 1 == accelerate_interpolator
+         * 2 == decelerate_interpolator
+         * 3 == accelerate_decelerate_interpolator
+         * 4 == anticipate_interpolator
+         * 5 == overshoot_interpolator
+         * 6 == anticipate_overshoot_interpolator
+         * 7 == bounce_interpolator
+         * @hide
+         */
+         public static final String LISTVIEW_INTERPOLATOR = "listview_interpolator";
+
+        /**
          * Whether FastPowerOn is enabled
+         * @hide
          */
         public static final String ENABLE_FAST_POWERON = "enable_fast_poweron";
+
+        /**
+         * @hide
+         */
+        public static final String LARGE_RECENT_THUMBS = "large_recent_thumbs";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -4041,6 +4193,7 @@ public final class Settings {
             NOTIFICATION_LIGHT_PULSE_DEFAULT_COLOR,
             NOTIFICATION_LIGHT_PULSE_DEFAULT_LED_ON,
             NOTIFICATION_LIGHT_PULSE_DEFAULT_LED_OFF,
+            NOTIFICATION_VIBRATE_DURING_ALERTS_DISABLED,
             SIP_CALL_OPTIONS,
             SIP_RECEIVE_CALLS,
             POINTER_SPEED,
@@ -4195,13 +4348,6 @@ public final class Settings {
                 Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON;
 
         /**
-         * wake up when plugged or unplugged
-         *
-         * @hide
-         */
-        public static final String WAKEUP_WHEN_PLUGGED_UNPLUGGED = "wakeup_when_plugged_unplugged";
-
-        /**
          * @deprecated Use
          * {@link android.provider.Settings.Global#WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY} instead
          */
@@ -4303,151 +4449,6 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_WATCHDOG_PING_TIMEOUT_MS =
             Secure.WIFI_WATCHDOG_PING_TIMEOUT_MS;
-
-        /**
-         * Hide carrier information on notification drawer
-         * @hide
-         */
-        public static final String NOTIFICATION_HIDE_CARRIER = "notification_hide_carrier";
-
-        /**
-         * @hide
-         * Show Wifi network name in notification shade
-         * 0 - don't show
-         * 1 - show
-         */
-        public static final String NOTIFICATION_SHOW_WIFI_SSID = "notification_show_wifi_ssid";
-
-        /**
-        * Sets the portrait background of notification drawer
-        * @hide
-        */
-        public static final String NOTIFICATION_BACKGROUND = "notification_background";
-
-        /**
-        * Sets the landscape background of notification drawer
-        * @hide
-        */
-        public static final String NOTIFICATION_BACKGROUND_LANDSCAPE = "notification_background_landscape";
-
-        /**
-        * Sets the alpha (transparency) of notification wallpaper
-        * @hide
-        */
-        public static final String NOTIF_WALLPAPER_ALPHA = "notif_wallpaper_alpha";
-
-        /**
-        * Sets the alpha (transparency) of notifications
-        * @hide
-        */
-        public static final String NOTIF_ALPHA = "notif_alpha";
-
-        /**
-         * Sets transparency of statusbar
-         * @hide
-         */
-        public static final String STATUS_BAR_ALPHA = "status_bar_alpha";
-
-        /**
-         * Sets transparency mode of status and navigation bar
-         * 0 = only home, 1 = keyguard and home (default)
-         * @hide
-         */
-        public static final String STATUS_NAV_BAR_ALPHA_MODE = "status_nav_bar_alpha_mode";
-
-        /**
-         * Sets color mode of status and navigation bar
-         * 0 = colorize always, 1 = colorize on keyguard and home (default)
-         * @hide
-         */
-        public static final String STATUS_NAV_BAR_COLOR_MODE = "status_nav_bar_color_mode";
-
-        /**
-         * Sets color of statusbar
-         * @hide
-         */
-        public static final String STATUS_BAR_COLOR = "status_bar_color";
-
-        /**
-         * @hide
-         */
-        public static final String STATUS_BAR_BRIGHTNESS_SLIDER = "statusbar_brightness_slider";
-
-        /**
-         * @hide
-         */
-        public static final String STATUSBAR_TOGGLES_BRIGHTNESS_LOC = "statusbar_toggles_brightness_loc";
-
-        /**
-         * toggle to "fix" the following: (found in NotificationManagerService)
-         *  new in 4.2: if there was supposed to be a sound and we're in vibrate mode,
-         *  we always vibrate, even if no vibration was specified
-         * @hide
-         */
-        public static final String NOTIFICATION_CONVERT_SOUND_TO_VIBRATION = "convert_sound_to_vibration";
-
-        /**
-         * Whether to allow notification vibration while notification alerts are disabled
-         * (e.g. during phone calls). The vibration pattern to be used will be a subtle one;
-         * custom vibration is disabled at that point.
-         * @hide
-         */
-        public static final String NOTIFICATION_VIBRATE_DURING_ALERTS_DISABLED = "vibrate_while_no_alerts";
-
-        /**
-         * Stores values for notification shortcut targets
-         * @hide
-         */
-        public static final String NOTIFICATION_SHORTCUTS_CONFIG = "notification_shortcuts_config";
-
-        /**
-         * Stores the value for notification shortcuts icon color
-         * @hide
-         */
-        public static final String NOTIFICATION_SHORTCUTS_COLOR = "notification_shortcuts_color";
-
-        /**
-         * Whether to colorize the default application icons
-         * @hide
-         */
-        public static final String NOTIFICATION_SHORTCUTS_COLOR_MODE = "notification_shortcuts_color_mode";
-
-        /**
-         * How long to wait between playing notification sounds from a package
-         * Should be in milliseconds. 0 to disable
-         * @hide
-         */
-        public static final String MUTE_ANNOYING_NOTIFICATIONS_THRESHOLD = "mute_annoying_notifications_threshold";
-
-        /**
-         * ListView Animations
-         * 0 == None
-         * 1 == Wave (Left)
-         * 2 == Wave (Right)
-         * 3 == Scale
-         * 4 == Alpha
-         * 5 == Stack (Top)
-         * 6 == Stack (Bottom)
-         * 7 == Translate (Left)
-         * 8 == Translate (Right)
-         * @hide
-         */
-         public static final String LISTVIEW_ANIMATION = "listview_animation";
-
-        /**
-         * ListView Interpolators
-         * 0 == None
-         * 1 == accelerate_interpolator
-         * 2 == decelerate_interpolator
-         * 3 == accelerate_decelerate_interpolator
-         * 4 == anticipate_interpolator
-         * 5 == overshoot_interpolator
-         * 6 == anticipate_overshoot_interpolator
-         * 7 == bounce_interpolator
-         * @hide
-         */
-         public static final String LISTVIEW_INTERPOLATOR = "listview_interpolator";
-
     }
 
     /**
@@ -6117,8 +6118,8 @@ public final class Settings {
             MOUNT_UMS_PROMPT,
             MOUNT_UMS_NOTIFY_ENABLED,
             UI_NIGHT_MODE,
-            DIALPAD_AUTOCOMPLETE,
             UI_INVERTED_MODE,
+            DIALPAD_AUTOCOMPLETE,
             LOCK_SCREEN_OWNER_INFO,
             LOCK_SCREEN_OWNER_INFO_ENABLED,
             ADVANCED_REBOOT,
@@ -6392,6 +6393,13 @@ public final class Settings {
          * @hide
          */
         public static final String BUGREPORT_IN_POWER_MENU = "bugreport_in_power_menu";
+
+        /**
+         * Whether to wake the display when plugging or unplugging the charger
+         *
+         * @hide
+         */
+        public static final String WAKE_WHEN_PLUGGED_OR_UNPLUGGED = "wake_when_plugged_or_unplugged";
 
         /**
          * Whether ADB is enabled.
@@ -7492,6 +7500,7 @@ public final class Settings {
         public static final String[] SETTINGS_TO_BACKUP = {
             BUGREPORT_IN_POWER_MENU,
             STAY_ON_WHILE_PLUGGED_IN,
+            WAKE_WHEN_PLUGGED_OR_UNPLUGGED,
             MODE_RINGER,
             AUTO_TIME,
             AUTO_TIME_ZONE,
