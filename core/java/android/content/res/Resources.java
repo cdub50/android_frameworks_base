@@ -2048,6 +2048,9 @@ public class Resources {
         }
     }
 
+    static private final int LAYOUT_DIR_CONFIG = ActivityInfo.activityInfoConfigToNative(
+            ActivityInfo.CONFIG_LAYOUT_DIRECTION);
+
     /*package*/ Drawable loadDrawable(TypedValue value, int id)
             throws NotFoundException {
 
