@@ -52,6 +52,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.SystemService;
 import android.os.UserHandle;
 import android.os.WorkSource;
@@ -1596,7 +1597,10 @@ public final class PowerManagerService extends IPowerManager.Stub
      * to being fully awake or else go to sleep for good.
      */
     private boolean isItBedTimeYetLocked() {
-        return mBootCompleted && !isBeingKeptAwakeLocked();
+        if (SystemProperties.getBoolean("ro.disablesuspend", false))
+            return false;
+        else
+            return mBootCompleted && !isBeingKeptAwakeLocked();
     }
 
     /**

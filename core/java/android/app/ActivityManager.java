@@ -393,7 +393,11 @@ public class ActivityManager {
 		}
 
         if (totalSize >= (512*1024*1024)) {
-            return true;
+            if (SystemProperties.getBoolean("ro.nohardwaregfx", false)) {
+                return false;
+            } else {
+                return true;
+            }
         }
 
         if (pixels == 0) {
