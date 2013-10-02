@@ -2526,25 +2526,6 @@ public final class Settings {
         public static final String LOCKSCREEN_TARGETS = "lockscreen_targets";
 
         /**
-         * Whether music controls should be shown on the lockscreen if a supporting
-         * music player is active.
-         * @hide
-         */
-        public static final String LOCKSCREEN_MUSIC_CONTROLS = "lockscreen_music_controls";
-
-        /**
-         * Whether to invert the colors when in bright light
-         * @hide
-         */
-        public static final String ACTIVE_DISPLAY_SUNLIGHT_MODE = "active_display_sunlight_mode";
-
-        /**
-         * Timeout of the display when there is no user interaction
-         * @hide
-         */
-        public static final String ACTIVE_DISPLAY_TIMEOUT = "active_display_timeout";
-
-        /**
          * @deprecated Use {@link android.provider.Settings.Global#LOW_BATTERY_SOUND}
          * instead
          * @hide
@@ -3264,6 +3245,12 @@ public final class Settings {
         public static final String RECENTS_RAM_BAR_ACTIVE_APPS_COLOR = "recents_ram_bar_active_apps_color";
 
         /**
+         * Choose position of clear button on recents window
+         * @hide
+         */
+        public static final String CLEAR_RECENTS_POSITION = "clear_recents_position";
+
+        /**
          * Override and forcefully disable the fullscreen keyboard
          * @hide
          */
@@ -3589,12 +3576,6 @@ public final class Settings {
         public static final String POWER_MENU_AIRPLANE_ENABLED = "power_menu_airplane_enabled";
 
         /**
-         * Whether power menu torch is enabled
-         * @hide
-         */
-        public static final String POWER_MENU_TORCH_ENABLED = "power_menu_torch_enabled";
-
-        /**
          * Whether power menu user switcher is enabled
          * @hide
          */
@@ -3605,6 +3586,12 @@ public final class Settings {
          * @hide
          */
         public static final String POWER_MENU_SOUND_ENABLED = "power_menu_silent_enabled";
+
+        /**
+         * Whether power menu torch is enabled
+         * @hide
+         */
+        public static final String POWER_MENU_TORCH_ENABLED = "power_menu_torch_enabled";
 
          /**
           * Volume keys control cursor in text fields (default is 0)
@@ -3926,6 +3913,13 @@ public final class Settings {
         public static final String LOCKSCREEN_USE_WIDGET_CONTAINER_CAROUSEL = "lockscreen_use_widget_container_carousel";
 
         /**
+         * Whether music controls should be shown on the lockscreen if a supporting
+         * music player is active.
+         * @hide
+         */
+        public static final String LOCKSCREEN_MUSIC_CONTROLS = "lockscreen_music_controls";
+
+        /**
          * Notifications Expand Behavior
          * @hide
          */
@@ -4241,10 +4235,16 @@ public final class Settings {
                 "active_display_hide_low_priority_notifications";
 
         /**
-         * Choose position of clear button on recents window
+         * Whether to invert the colors when in bright light
          * @hide
          */
-        public static final String CLEAR_RECENTS_POSITION = "clear_recents_position";
+        public static final String ACTIVE_DISPLAY_SUNLIGHT_MODE = "active_display_sunlight_mode";
+
+        /**
+         * Timeout of the display when there is no user interaction
+         * @hide
+         */
+        public static final String ACTIVE_DISPLAY_TIMEOUT = "active_display_timeout";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
