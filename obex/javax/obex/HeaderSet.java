@@ -540,7 +540,7 @@ public final class HeaderSet {
      */
     public int[] getHeaderList() throws IOException {
         ByteArrayOutputStream out = null;
-        try{
+        try {
             out = new ByteArrayOutputStream();
 
             if (mConnectionID != null) {
@@ -584,8 +584,9 @@ public final class HeaderSet {
             }
 
             for (int i = 0x30; i < 0x40; i++) {
-            if (mUnicodeUserDefined[i - 0x30] != null) {
-                out.write(i);
+                if (mUnicodeUserDefined[i - 0x30] != null) {
+                    out.write(i);
+                }
             }
 
             for (int i = 0x30; i < 0x40; i++) {
