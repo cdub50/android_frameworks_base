@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-package com.android.internal.util.slim;
+package com.android.internal.util.liquid;
 
 public class ButtonConfig {
 
@@ -77,5 +77,4 @@ public class ButtonConfig {
     public void setIcon(String iconUri) {
         mIconUri = iconUri;
     }
-
 }

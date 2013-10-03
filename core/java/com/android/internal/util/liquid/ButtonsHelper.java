@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-package com.android.internal.util.slim;
+package com.android.internal.util.liquid;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -76,8 +76,7 @@ public class ButtonsHelper {
             config = setButtonsConfig(buttonsConfig, false);
         }
         Settings.System.putString(context.getContentResolver(),
-                    Settings.System.SYSTEMUI_NAVBAR_CONFIG,
-                    config);
+                    Settings.System.SYSTEMUI_NAVBAR_CONFIG, config);
     }
 
     // get and set the pie configs from provider and return propper arraylist objects
@@ -111,8 +110,7 @@ public class ButtonsHelper {
             config = setButtonsConfig(buttonsConfig, false);
         }
         Settings.System.putString(context.getContentResolver(),
-                    Settings.System.PIE_BUTTONS_CONFIG,
-                    config);
+                    Settings.System.PIE_BUTTONS_CONFIG, config);
     }
 
     public static ArrayList<ButtonConfig> getPieSecondLayerConfig(Context context) {
@@ -179,8 +177,7 @@ public class ButtonsHelper {
             config = setButtonsConfig(buttonsConfig, false);
         }
         Settings.System.putString(context.getContentResolver(),
-                    Settings.System.SYSTEMUI_NAVRING_CONFIG,
-                    config);
+                    Settings.System.SYSTEMUI_NAVRING_CONFIG, config);
     }
 
     // get and set the lockcreen shortcut configs from provider and return propper arraylist objects
@@ -205,8 +202,7 @@ public class ButtonsHelper {
             config = setButtonsConfig(buttonsConfig, true);
         }
         Settings.System.putString(context.getContentResolver(),
-                    Settings.System.LOCKSCREEN_SHORTCUTS_CONFIG,
-                    config);
+                    Settings.System.LOCKSCREEN_SHORTCUTS_CONFIG, config);
     }
 
     // get and set the notification shortcut configs from provider and return propper arraylist objects
@@ -231,8 +227,7 @@ public class ButtonsHelper {
             config = setButtonsConfig(buttonsConfig, true);
         }
         Settings.System.putString(context.getContentResolver(),
-                    Settings.System.NOTIFICATION_SHORTCUTS_CONFIG,
-                    config);
+                    Settings.System.NOTIFICATION_SHORTCUTS_CONFIG, config);
     }
 
     private static ArrayList<ButtonConfig> getButtonsConfigValues(Context context, String config,
@@ -506,5 +501,4 @@ public class ButtonsHelper {
 
         return uri;
     }
-
 }

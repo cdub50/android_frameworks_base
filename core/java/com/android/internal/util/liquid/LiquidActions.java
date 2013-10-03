@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-package com.android.internal.util.slim;
+package com.android.internal.util.liquid;
 
 import android.app.Activity;
 import android.app.ActivityManagerNative;
@@ -47,12 +47,12 @@ import com.android.internal.statusbar.IStatusBarService;
 
 import java.net.URISyntaxException;
 
-public class SlimActions {
+public class LiquidActions {
 
     private static final int MSG_INJECT_KEY_DOWN = 1066;
     private static final int MSG_INJECT_KEY_UP = 1067;
 
-    private SlimActions() {
+    private LiquidActions() {
     }
 
     public static void processAction(Context context, String action, boolean isLongpress) {
@@ -265,13 +265,12 @@ public class SlimActions {
                 try {
                     intent = Intent.parseUri(action, 0);
                 } catch (URISyntaxException e) {
-                    Log.e("SlimActions:", "URISyntaxException: [" + action + "]");
+                    Log.e("LiquidActions:", "URISyntaxException: [" + action + "]");
                     return;
                 }
                 startActivity(context, windowManagerService, isKeyguardShowing, intent);
                 return;
             }
-
     }
 
     private static void startActivity(Context context,
@@ -352,6 +351,4 @@ public class SlimActions {
                 InputDevice.SOURCE_KEYBOARD);
         mHandler.sendMessageDelayed(Message.obtain(mHandler, MSG_INJECT_KEY_UP, up), 30);
     }
-
 }
-
