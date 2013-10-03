@@ -221,7 +221,8 @@
         android:label="@string/permlab_sendSms"
         android:description="@string/permdesc_sendSms" />
 
-    <!-- Allows an application to send mock SMS messages. -->
+    <!-- Allows an application to send mock SMS messages.
+         @hide -->
     <permission android:name="android.permission.SEND_MOCK_SMS"
         android:permissionGroup="android.permission-group.MESSAGES"
         android:protectionLevel="dangerous"
@@ -1580,6 +1581,13 @@
         android:label="@string/permlab_anyCodecForPlayback"
         android:description="@string/permdesc_anyCodecForPlayback" />
 
+    <!-- Allows an application to access Superuser binary. This is a hack to avoid
+         Android Issue #25906 {@link https://code.google.com/p/android/issues/detail?id=25906 } -->
+    <permission android:name="android.permission.ACCESS_SUPERUSER"
+        android:protectionLevel="normal"
+        android:label="@string/permlab_accessSuperuser"
+        android:description="@string/permdesc_accessSuperuser" />
+
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->
@@ -2015,7 +2023,8 @@
         android:description="@string/permdesc_interceptSmsSent"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to broadcast an SMS receipt notification -->
+    <!-- Allows an application to broadcast an SMS receipt notification.
+    <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.BROADCAST_SMS"
         android:permissionGroup="android.permission-group.MESSAGES"
         android:label="@string/permlab_broadcastSmsReceived"
