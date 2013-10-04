@@ -55,6 +55,7 @@ import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
@@ -68,6 +69,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+import android.service.notification.StatusBarNotification;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -402,6 +404,10 @@ public class PhoneStatusBar extends BaseStatusBar {
                     Settings.System.EXPANDED_DESKTOP_STATE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NOTIFICATION_SETTINGS_BUTTON), false, this);
+	        resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QUICK_TILES_BG_COLOR), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QUICK_TILES_BG_PRESSED_COLOR), false, this);
             update();
         }
 
@@ -738,7 +744,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     @Override
                     public void onLayoutChange(View v, int left, int top, int right, int bottom,
                             int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                        updateCarrierLabelVisibility(false);
+                        updateCarrierAndWifiLabelVisibility(false);
                     }});
             }
         }
@@ -825,9 +831,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                     mSettingsPanel = (SettingsPanelView) ((ViewStub)settings_stub).inflate();
                 } else {
                     mSettingsPanel = (SettingsPanelView) mStatusBarWindow.findViewById(R.id.settings_panel);
-                }
-
-                if (mSettingsPanel != null) {
                 }
             }
 
@@ -918,8 +921,6 @@ public class PhoneStatusBar extends BaseStatusBar {
              mPowerWidget.setVisibility(View.VISIBLE);
 
         mNotificationShortcutsLayout.setupShortcuts();
-
-        mVelocityTracker = VelocityTracker.obtain();
 
         mIsAutoBrightNess = checkAutoBrightNess();
 
@@ -1087,6 +1088,13 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
         return mNaturalBarHeight;
     }
+
+    private View.OnClickListener mRecentsClickListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            awakenDreams();
+            toggleRecentApps();
+        }
+    };
 
     private int mShowSearchHoldoff = 0;
     private final Runnable mShowSearchPanel = new Runnable() {
@@ -1998,6 +2006,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return ;
         }
+        // don't allow expanding via e.g. service call while status bar is hidden
+        // due to expanded desktop
+        if (getExpandedDesktopMode() == 2) {
+            return;
+        }
 
         mNotificationPanel.expand();
         mNotificationPanelIsOpen = true;
@@ -2081,13 +2094,17 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         if (mNotificationShortcutsIsActive)
             updateNotificationShortcutsVisibility(true);
-
     }
 
     @Override
     public void animateExpandSettingsPanel(boolean flip) {
         if (SPEW) Slog.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
+            return;
+        }
+        // don't allow expanding via e.g. service call while status bar is hidden
+        // due to expanded desktop
+        if (getExpandedDesktopMode() == 2) {
             return;
         }
 
@@ -2482,12 +2499,12 @@ public class PhoneStatusBar extends BaseStatusBar {
                 mInitialTouchX = x;
                 mInitialTouchY = y;
                 mHandler.removeCallbacks(mLongPressBrightnessChange);
-                if ((y + mViewDelta) < mNotificationHeaderHeight) {
+                if (y < mNotificationHeaderHeight) {
                     mHandler.postDelayed(mLongPressBrightnessChange,
                             BRIGHTNESS_CONTROL_LONG_PRESS_TIMEOUT);
                 }
             } else if (action == MotionEvent.ACTION_MOVE) {
-                if ((y + mViewDelta) < mNotificationHeaderHeight) {
+                if (y < mNotificationHeaderHeight) {
                     mVelocityTracker.computeCurrentVelocity(1000);
                     float yVel = mVelocityTracker.getYVelocity();
                     yVel = Math.abs(yVel);
@@ -2568,7 +2585,7 @@ public class PhoneStatusBar extends BaseStatusBar {
              if (!mIsAutoBrightNess) {
                  mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_STATUSBAR_BRIGHTNESS),
                  ViewConfiguration.getGlobalActionKeyTimeout());
-                 }
+             }
         }
         return false;
     }
@@ -2687,10 +2704,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         } catch (RemoteException ex) {
         }
     }
-
-    public void setNavigationBarLightsOn(boolean on, boolean force) {
-        mNavigationBarView.setLowProfile(!on, true, force);
-    } 
 
     @Override
     public void topAppWindowChanged(boolean showMenu) {
@@ -3084,7 +3097,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
             try {
                 animateCollapsePanels();
-                Intent i = new Intent("com.android.settings.slim.quicksettings.QuickSettings");
+                Intent i = new Intent("com.android.settings.liquid.quicksettings.QuickSettings");
                 i.addCategory(Intent.CATEGORY_DEFAULT);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 v.getContext().startActivity(i);
@@ -3614,7 +3627,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             return;
         }
         double percent = ((screenBrightness / (double) 255) * 100) + 0.5;
-
     }
 
     private int checkMinMax(int brightness) {
