@@ -251,11 +251,11 @@ public final class ActivityManagerService  extends ActivityManagerNative
 
     // The minimum sample duration we will allow before deciding we have
     // enough data on CPU usage to start killing things.
-    static final int CPU_MIN_CHECK_DURATION = (DEBUG_POWER_QUICK ? 1 : 4) * 60*1000;
+    static final int CPU_MIN_CHECK_DURATION = (DEBUG_POWER_QUICK ? 1 : 5) * 60*1000;
 
     // How long we allow a receiver to run before giving up on it.
-    static final int BROADCAST_FG_TIMEOUT = 8*1000;
-    static final int BROADCAST_BG_TIMEOUT = 45*1000;
+    static final int BROADCAST_FG_TIMEOUT = 10*1000;
+    static final int BROADCAST_BG_TIMEOUT = 60*1000;
 
     // How long we wait until we timeout on key dispatching.
     static final int KEY_DISPATCHING_TIMEOUT = 5*1000;
@@ -268,7 +268,7 @@ public final class ActivityManagerService  extends ActivityManagerNative
     static final int USER_SWITCH_TIMEOUT = 2*1000;
 
     // Maximum number of users we allow to be running at a time.
-    static final int MAX_RUNNING_USERS = 2;
+    static final int MAX_RUNNING_USERS = 3;
 
     // How long to wait in getTopActivityExtras for the activity to respond with the result.
     static final int PENDING_ACTIVITY_RESULT_TIMEOUT = 2*2000;
@@ -1406,21 +1406,6 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 timeoutUserSwitch((UserStartedState)msg.obj, msg.arg1, msg.arg2);
                 break;
             }
-            case IMMERSIVE_MODE_LOCK_MSG: {
-                final boolean nextState = (msg.arg1 != 0);
-                if (mUpdateLock.isHeld() != nextState) {
-                    if (DEBUG_IMMERSIVE) {
-                        final ActivityRecord r = (ActivityRecord) msg.obj;
-                        Slog.d(TAG, "Applying new update lock state '" + nextState + "' for " + r);
-                    }
-                    if (nextState) {
-                        mUpdateLock.acquire();
-                    } else {
-                        mUpdateLock.release();
-                    }
-                }
-                break;
-            }
             case POST_PRIVACY_NOTIFICATION_MSG: {
                 INotificationManager inm = NotificationManager.getService();
                 if (inm == null) {
@@ -1484,6 +1469,21 @@ public final class ActivityManagerService  extends ActivityManagerNative
                 } catch (RemoteException e) {
                 }
             } break;
+            case IMMERSIVE_MODE_LOCK_MSG: {
+                final boolean nextState = (msg.arg1 != 0);
+                if (mUpdateLock.isHeld() != nextState) {
+                    if (DEBUG_IMMERSIVE) {
+                        final ActivityRecord r = (ActivityRecord) msg.obj;
+                        Slog.d(TAG, "Applying new update lock state '" + nextState + "' for " + r);
+                    }
+                    if (nextState) {
+                        mUpdateLock.acquire();
+                    } else {
+                        mUpdateLock.release();
+                    }
+                }
+                break;
+            }
             }
         }
     };
@@ -12984,19 +12984,19 @@ public final class ActivityManagerService  extends ActivityManagerNative
         return srec.launchedFromUid;
     }
 
+    private void saveThemeResourceLocked(CustomTheme t, boolean isDiff){
+        if(isDiff){
+            SystemProperties.set(Configuration.THEME_ID_PERSISTENCE_PROPERTY, t.getThemeId());
+            SystemProperties.set(Configuration.THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY, t.getThemePackageName());
+        }
+    }
+
     public String getLaunchedFromPackage(IBinder activityToken) {
         ActivityRecord srec = ActivityRecord.forToken(activityToken);
         if (srec == null) {
             return null;
         }
         return srec.launchedFromPackage;
-    }
-
-    private void saveThemeResourceLocked(CustomTheme t, boolean isDiff){
-        if(isDiff){
-            SystemProperties.set(Configuration.THEME_ID_PERSISTENCE_PROPERTY, t.getThemeId());
-            SystemProperties.set(Configuration.THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY, t.getThemePackageName());
-        }
     }
 
     // =========================================================
