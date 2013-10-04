@@ -633,6 +633,8 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_EHRPD
      * @see #NETWORK_TYPE_HSPAP
      * @see #NETWORK_TYPE_DCHSPAP
+     *
+     * @hide
      */
     public int getDataNetworkType() {
         try{
