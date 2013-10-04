@@ -606,6 +606,15 @@ public final class WifiService extends IWifiManager.Stub {
         }
     }
 
+
+    /**
+     * Get the operational country code
+     */
+    public String getCountryCode() {
+        enforceAccessPermission();
+        return mWifiStateMachine.getCountryCode();
+    }
+
     /**
      * Set the operational frequency band
      * @param band One of
