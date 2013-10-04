@@ -290,4 +290,3 @@ public abstract class Ticker {
     public abstract void tickerDone();
     public abstract void tickerHalting();
 }
-
