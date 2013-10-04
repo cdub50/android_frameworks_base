@@ -123,14 +123,21 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private boolean mSafeModeEnabled;
 
-    // We can use the profile manager to override security
-    private ProfileManager mProfileManager;
+    private boolean mUserSetupCompleted;
 
     /*package*/ interface TransportCallback {
         void onListenerDetached();
         void onListenerAttached();
         void onPlayStateChanged();
     }
+
+    // User for whom this host view was created.  Final because we should never change the
+    // id without reconstructing an instance of KeyguardHostView. See note below...
+    private final int mUserId;
+
+    private KeyguardMultiUserSelectorView mKeyguardMultiUserSelectorView;
+
+    protected int mClientGeneration;
 
     /*package*/ interface UserSwitcherCallback {
         void hideSecurityView(int duration);
@@ -154,14 +161,17 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (DEBUG) Log.e(TAG, "KeyguardHostView()");
 
         mLockPatternUtils = new LockPatternUtils(context);
+        mAppWidgetHost = new AppWidgetHost(
+                context, APPWIDGET_HOST_ID, mOnClickHandler, Looper.myLooper());
+
+        mAppWidgetManager = AppWidgetManager.getInstance(mContext);
+        mSecurityModel = new KeyguardSecurityModel(context);
 
         // Note: This depends on KeyguardHostView getting reconstructed every time the
         // user switches, since mUserId will be used for the entire session.
         // Once created, keyguard should *never* re-use this instance with another user.
         // In other words, mUserId should never change - hence it's marked final.
         mUserId = mLockPatternUtils.getCurrentUser();
-
-        mProfileManager = (ProfileManager) context.getSystemService(Context.PROFILE_SERVICE);
 
         DevicePolicyManager dpm =
                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
@@ -172,6 +182,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         cleanupAppWidgetIds();
         mSafeModeEnabled = LockPatternUtils.isSafeModeEnabled();
+        mUserSetupCompleted = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
 
         // These need to be created with the user context...
         Context userContext = null;
@@ -237,9 +249,22 @@ public class KeyguardHostView extends KeyguardViewBase {
             // that are triggered by deleteAppWidgetId, which is why we're doing this
             int[] appWidgetIdsInKeyguardSettings = mLockPatternUtils.getAppWidgets();
             int[] appWidgetIdsBoundToHost = mAppWidgetHost.getAppWidgetIds();
+            int fallbackWidgetId = mLockPatternUtils.getFallbackAppWidgetId();
             for (int i = 0; i < appWidgetIdsBoundToHost.length; i++) {
                 int appWidgetId = appWidgetIdsBoundToHost[i];
                 if (!contains(appWidgetIdsInKeyguardSettings, appWidgetId)) {
+                    if (appWidgetId == fallbackWidgetId) {
+                        if (widgetsDisabledByDpm()) {
+                            // Ignore attempts to delete the fallback widget when widgets
+                            // are disabled
+                            continue;
+                        } else {
+                            // Reset fallback widget id in the event that widgets have been
+                            // enabled, and fallback widget is being deleted
+                            mLockPatternUtils.writeFallbackAppWidgetId(
+                                    AppWidgetManager.INVALID_APPWIDGET_ID);
+                        }
+                    }
                     Log.d(TAG, "Found a appWidgetId that's not being used by keyguard, deleting id "
                             + appWidgetId);
                     mAppWidgetHost.deleteAppWidgetId(appWidgetId);
@@ -423,17 +448,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         minimizeChallengeIfDesired();
     }
 
-    private void setBackButtonEnabled(boolean enabled) {
-        if (mContext instanceof Activity) return;  // always enabled in activity mode
-        setSystemUiVisibility(enabled ?
-                getSystemUiVisibility() & ~View.STATUS_BAR_DISABLE_BACK :
-                getSystemUiVisibility() | View.STATUS_BAR_DISABLE_BACK);
-    }
-
-    private boolean shouldEnableAddWidget() {
-        return numWidgets() < MAX_WIDGETS && mUserSetupCompleted;
-    }
-
     private final OnLongClickListener mFastUnlockClickListener = new OnLongClickListener() {
         @Override
         public boolean onLongClick(View v) {
@@ -585,7 +599,8 @@ public class KeyguardHostView extends KeyguardViewBase {
             if (deletePermanently) {
                 final int appWidgetId = ((KeyguardWidgetFrame) v).getContentAppWidgetId();
                 if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID &&
-                        appWidgetId != LockPatternUtils.ID_DEFAULT_STATUS_WIDGET) {
+                        appWidgetId != LockPatternUtils.ID_DEFAULT_STATUS_WIDGET &&
+                        appWidgetId != mLockPatternUtils.getFallbackAppWidgetId()) {
                     mAppWidgetHost.deleteAppWidgetId(appWidgetId);
                 }
             }
@@ -669,7 +684,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         public void setOnDismissAction(OnDismissAction action) {
             KeyguardHostView.this.setOnDismissAction(action);
         }
-
     };
 
     private void showDialog(String title, String message) {
@@ -1107,8 +1121,9 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (mViewStateManager != null) {
             mViewStateManager.showUsabilityHints();
         }
-        requestFocus();
+
         minimizeChallengeIfDesired();
+        requestFocus();
     }
 
     @Override
@@ -1141,31 +1156,10 @@ public class KeyguardHostView extends KeyguardViewBase {
         showPrimarySecurityScreen(false);
     }
 
-    private boolean isSecure() {
-        SecurityMode mode = mSecurityModel.getSecurityMode();
-        switch (mode) {
-            case Pattern:
-                return mLockPatternUtils.isLockPatternEnabled()
-                        && mProfileManager.getActiveProfile().getScreenLockMode()!= Profile.LockMode.INSECURE;
-            case Password:
-            case PIN:
-                return mLockPatternUtils.isLockPasswordEnabled()
-                        && mProfileManager.getActiveProfile().getScreenLockMode() != Profile.LockMode.INSECURE;
-            case SimPin:
-            case SimPuk:
-            case Account:
-                return true;
-            case None:
-                return false;
-            default:
-                throw new IllegalStateException("Unknown security mode " + mode);
-        }
-    }
-
     @Override
     public void wakeWhenReadyTq(int keyCode) {
         if (DEBUG) Log.d(TAG, "onWakeKey");
-        if (keyCode == KeyEvent.KEYCODE_MENU && isSecure()) {
+        if (keyCode == KeyEvent.KEYCODE_MENU && mSecurityModel.getSecurityMode() != SecurityMode.None) {
             if (DEBUG) Log.d(TAG, "switching screens to unlock screen because wake key was MENU");
             showSecurityScreen(SecurityMode.None);
         } else {
@@ -1338,7 +1332,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         // We currently disable cameras in safe mode because we support loading 3rd party
         // cameras we can't trust.  TODO: plumb safe mode into camera creation code and only
         // inflate system-provided camera?
-        if (!mSafeModeEnabled && !cameraDisabledByDpm()
+        if (!mSafeModeEnabled && !cameraDisabledByDpm() && mUserSetupCompleted
                 && Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.LOCKSCREEN_CAMERA_WIDGET, 0) == 1) {
             View cameraWidget =
@@ -1835,5 +1829,4 @@ public class KeyguardHostView extends KeyguardViewBase {
         mActivityLauncher.launchActivityWithAnimation(
                 intent, false, opts.toBundle(), null, null);
     }
-
 }
