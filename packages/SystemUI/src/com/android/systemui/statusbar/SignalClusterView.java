@@ -20,6 +20,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Slog;
@@ -61,7 +62,6 @@ public class SignalClusterView
     View mSpacer;
 
     Handler mHandler;
-
     private SettingsObserver mSettingsObserver;
 
     class SettingsObserver extends ContentObserver {
@@ -284,15 +284,17 @@ public class SignalClusterView
 
     private void updateSignalClusterStyle() {
         if (!mIsAirplaneMode) {
-            mMobileGroup.setVisibility(mSignalClusterStyle != SIGNAL_CLUSTER_STYLE_NORMAL ? View.GONE : View.VISIBLE);
+            if (mMobileGroup != null)
+                mMobileGroup.setVisibility(mSignalClusterStyle !=
+                        SIGNAL_CLUSTER_STYLE_NORMAL ? View.GONE : View.VISIBLE);
         }
     }
 
-    private void updateSettings() {
+    public void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
-        mSignalClusterStyle = (Settings.System.getInt(resolver,
-                Settings.System.STATUS_BAR_SIGNAL_TEXT, SIGNAL_CLUSTER_STYLE_NORMAL));
+        mSignalClusterStyle = Settings.System.getIntForUser(resolver,
+                Settings.System.STATUS_BAR_SIGNAL_TEXT, SIGNAL_CLUSTER_STYLE_NORMAL,
+                UserHandle.USER_CURRENT);
         updateSignalClusterStyle();
     }
 }
-
