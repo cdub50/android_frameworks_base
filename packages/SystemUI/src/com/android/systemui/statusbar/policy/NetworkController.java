@@ -1054,7 +1054,6 @@ public class NetworkController extends BroadcastReceiver {
         updateWifiIcons();
     }
 
-
     // ===== Update the views =======================================================
 
     void refreshViews() {
@@ -1583,6 +1582,4 @@ public class NetworkController extends BroadcastReceiver {
             return "(null)";
         }
     }
-
 }
-

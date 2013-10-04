@@ -46,8 +46,8 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.ImageView;
 
-import com.android.internal.util.slim.ButtonsConstants;
-import com.android.internal.util.slim.SlimActions;
+import com.android.internal.util.liquid.ButtonsConstants;
+import com.android.internal.util.liquid.LiquidActions;
 
 import com.android.systemui.R;
 
@@ -82,7 +82,7 @@ public class KeyButtonView extends ImageView {
             mIsLongpressed = true;
             if (isPressed()) {
                 sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
-                if (SlimActions.isActionKeyEvent(mLongpressAction)) {
+                if (LiquidActions.isActionKeyEvent(mLongpressAction)) {
                     setHapticFeedbackEnabled(false);
                 }
                 performLongClick();
@@ -179,7 +179,6 @@ public class KeyButtonView extends ImageView {
             }
             mGlowBG.setColorFilter(null);
             mGlowBG.setColorFilter(mGlowBGColor, PorterDuff.Mode.SRC_ATOP);
-
         }
     }
 
@@ -338,7 +337,7 @@ public class KeyButtonView extends ImageView {
                     } else {
                         // no key code, it is a custom click action
                         if (doIt) {
-                            if (!SlimActions.isActionKeyEvent(mClickAction)) {
+                            if (!LiquidActions.isActionKeyEvent(mClickAction)) {
                                 performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                             }
                             performClick();
@@ -360,7 +359,7 @@ public class KeyButtonView extends ImageView {
     private OnClickListener mClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            SlimActions.processAction(mContext, mClickAction, false);
+            LiquidActions.processAction(mContext, mClickAction, false);
             return;
         }
     };
@@ -368,7 +367,7 @@ public class KeyButtonView extends ImageView {
     private OnLongClickListener mLongPressListener = new OnLongClickListener() {
         @Override
         public boolean onLongClick(View v) {
-            SlimActions.processAction(mContext, mLongpressAction, true);
+            LiquidActions.processAction(mContext, mLongpressAction, true);
             return true;
         }
     };
@@ -475,5 +474,3 @@ public class KeyButtonView extends ImageView {
         }
     }
 }
-
-
