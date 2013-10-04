@@ -4261,6 +4261,12 @@ public final class Settings {
         public static final String ACTIVE_DISPLAY_TIMEOUT = "active_display_timeout";
 
         /**
+         * Adjust the vibration multiplier to control vibration strength
+         * @hide
+         */
+        public static final String VIBRATION_MULTIPLIER = "vibration_multiplier";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
