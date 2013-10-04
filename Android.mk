@@ -26,8 +26,6 @@ LOCAL_PATH := $(call my-dir)
 # TODO: find a more appropriate way to do this.
 framework_res_source_path := APPS/framework-res_intermediates/src
 
-# the library
-# ============================================================
 include $(CLEAR_VARS)
 
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
@@ -215,8 +213,8 @@ LOCAL_SRC_FILES += \
 	location/java/android/location/ICountryListener.aidl \
 	location/java/android/location/IGeocodeProvider.aidl \
 	location/java/android/location/IGeofenceProvider.aidl \
-        location/java/android/location/IGeoFencer.aidl \
-        location/java/android/location/IGeoFenceListener.aidl \
+    location/java/android/location/IGeoFencer.aidl \
+    location/java/android/location/IGeoFenceListener.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
 	location/java/android/location/IGpsStatusProvider.aidl \
 	location/java/android/location/ILocationListener.aidl \
@@ -793,7 +791,6 @@ LOCAL_MODULE := ext
 LOCAL_DX_FLAGS := --core-library
 
 include $(BUILD_JAVA_LIBRARY)
-
 
 # Include subdirectory makefiles
 # ============================================================
