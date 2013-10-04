@@ -84,7 +84,7 @@ public class ToggleLockscreenTile extends QuickSettingsTile {
                 Intent intent = new Intent();
                 intent.setComponent(new ComponentName(
                         "com.android.settings",
-                        "com.android.settings.Settings$ASSLockscreenActivity"));
+                        "com.android.settings.Settings$LockscreenActivity"));
                 startSettingsActivity(intent);
                 return true;
             }

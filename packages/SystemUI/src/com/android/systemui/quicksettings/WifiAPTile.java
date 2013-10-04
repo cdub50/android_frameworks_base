@@ -62,7 +62,7 @@ public class WifiAPTile extends QuickSettingsTile {
                         setSoftapEnabled(true);
                         break;
                 }
-		if (isFlipTilesEnabled()) {
+		        if (isFlipTilesEnabled()) {
                     flipTile(0);
                 }
             }
@@ -133,5 +133,4 @@ public class WifiAPTile extends QuickSettingsTile {
             }
         }
     }
-
 }

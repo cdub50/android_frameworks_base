@@ -27,7 +27,6 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 import com.android.systemui.statusbar.phone.QuickSettingsController;
 
-
 public class NfcTile extends QuickSettingsTile {
 
     private static String TAG = "NfcTile";

@@ -52,7 +52,7 @@ public class WiFiTile extends QuickSettingsTile implements NetworkSignalChangedC
             public void onClick(View v) {
                 WifiManager wfm = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
                 wfm.setWifiEnabled(!wfm.isWifiEnabled());
-		if (isFlipTilesEnabled()) {
+		        if (isFlipTilesEnabled()) {
                     flipTile(0);
                 }
             }
@@ -102,14 +102,9 @@ public class WiFiTile extends QuickSettingsTile implements NetworkSignalChangedC
             int mobileSignalIconId, String mobileSignalContentDescriptionId,
             int dataTypeIconId, String dataTypeContentDescriptionId,
             String description) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void onAirplaneModeChanged(boolean enabled) {
-        // TODO Auto-generated method stub
-
     }
-
 }

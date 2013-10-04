@@ -77,8 +77,7 @@ public class UserTile extends QuickSettingsTile {
                         (UserManager) mContext.getSystemService(Context.USER_SERVICE);
                 if (um.getUsers(true).size() > 1) {
                     try {
-                        WindowManagerGlobal.getWindowManagerService().lockNow(
-                                LockPatternUtils.USER_SWITCH_LOCK_OPTIONS);
+                        WindowManagerGlobal.getWindowManagerService().lockNow(null);
                     } catch (RemoteException e) {
                         if (DBG) Log.e(TAG, "Couldn't show user switcher", e);
                     }
@@ -86,7 +85,7 @@ public class UserTile extends QuickSettingsTile {
                     Intent intent = new Intent(Intent.ACTION_VIEW, ContactsContract.Profile.CONTENT_URI);
                     startSettingsActivity(intent);
                 }
-		if (isFlipTilesEnabled()) {
+		        if (isFlipTilesEnabled()) {
                     flipTile(0);
                 }
             }
@@ -146,7 +145,6 @@ public class UserTile extends QuickSettingsTile {
                     // The system needs some time to change the picture, if we try to load it when we receive the broadcast, we will load the old one
                     Thread.sleep(50);
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 final UserManager um =
@@ -205,5 +203,4 @@ public class UserTile extends QuickSettingsTile {
             mUserInfoTask = null;
         }
     }
-
 }

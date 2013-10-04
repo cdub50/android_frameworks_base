@@ -53,7 +53,7 @@ public class AutoRotateTile extends QuickSettingsTile {
             @Override
             public void onClick(View v) {
                 RotationPolicy.setRotationLock(mContext, getAutoRotation());
-		if (isFlipTilesEnabled()) {
+		        if (isFlipTilesEnabled()) {
                     flipTile(0);
                 }
             }
@@ -65,7 +65,7 @@ public class AutoRotateTile extends QuickSettingsTile {
                 Intent intent = new Intent();
                 intent.setComponent(new ComponentName(
                         "com.android.settings",
-                        "com.android.settings.Settings$ASSDisplayRotationActivity"));
+                        "com.android.settings.Settings$DisplayRotationActivity"));
                 startSettingsActivity(intent);
                 return true;
             }

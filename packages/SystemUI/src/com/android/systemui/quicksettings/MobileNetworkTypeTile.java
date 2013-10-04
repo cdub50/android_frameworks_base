@@ -112,7 +112,7 @@ public class MobileNetworkTypeTile extends QuickSettingsTile {
                         }
                         break;
                 }
-		if (isFlipTilesEnabled()) {
+		        if (isFlipTilesEnabled()) {
                     flipTile(0);
                 }
 

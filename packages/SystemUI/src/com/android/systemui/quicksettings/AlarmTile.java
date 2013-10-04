@@ -83,5 +83,4 @@ public class AlarmTile extends QuickSettingsTile{
         mLabel = Settings.System.getString(mContext.getContentResolver(),
             Settings.System.NEXT_ALARM_FORMATTED);
     }
-
 }
