@@ -297,5 +297,5 @@
 
     <!-- AM/PM size in active display -->
     <dimen name="ad_ampm_font_size">32dp</dimen>
- 
+
 </resources>
