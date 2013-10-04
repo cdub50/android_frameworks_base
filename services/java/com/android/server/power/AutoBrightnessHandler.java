@@ -42,21 +42,6 @@ public class AutoBrightnessHandler {
 
     private static final int PANEL_MANUAL = 0;
 
-<<<<<<< HEAD
-    private final int mPanelAutoValue;
-
-    public AutoBrightnessHandler(Context context) {
-        mPanelAutoValue = context.getResources().getInteger(
-                com.android.internal.R.integer.config_panelAutoBrightnessValue);
-    }
-
-    public void onAutoBrightnessChanged(int mode) {
-        if (mPanelAutoValue > -1) {
-            int override = SystemProperties.getInt(ALT_BRIGHTNESS_PROP, -1);
-            writeValue(NODE, mode == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC ?
-                    (override > -1 ? override : mPanelAutoValue) : PANEL_MANUAL);
-        }
-=======
     public AutoBrightnessHandler(Context context) {
     }
 
@@ -64,7 +49,6 @@ public class AutoBrightnessHandler {
         int override = SystemProperties.getInt(ALT_BRIGHTNESS_PROP, -1);
         writeValue(NODE, mode == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC ?
                 (override > -1 ? override : panelAutoValue) : PANEL_MANUAL);
->>>>>>> 6842063... power: Add panel auto-brightness configuration
     }
 
     private static void writeValue(String filename, int value) {

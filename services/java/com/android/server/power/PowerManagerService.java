@@ -154,7 +154,6 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static final int SCREEN_DIM_DURATION = 7 * 1000;
     private static final int BUTTON_ON_DURATION = 5 * 1000;
 
-
     // The maximum screen dim time expressed as a ratio relative to the screen
     // off timeout.  If the screen off timeout is very short then we want the
     // dim timeout to also be quite short so that most of the time is spent on.
@@ -326,7 +325,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     // The screen off timeout setting value in milliseconds.
     private int mScreenOffTimeoutSetting;
 
-    // Slim settings - override config for ElectronBeam
+    // Override config for ElectronBeam
     // used here to send values to DispLayPowerController handler
     // from SettingsObserver
     private boolean mElectronBeamOffEnabled;
@@ -358,9 +357,6 @@ public final class PowerManagerService extends IPowerManager.Stub
     // The screen auto-brightness adjustment setting, from -1 to 1.
     // Use 0 if there is no adjustment.
     private float mScreenAutoBrightnessAdjustmentSetting;
-
-    // The screen auto-brightness responsitivity factor, from 0.2 to 3.
-    private float mAutoBrightnessResponsitivityFactor;
 
     // Alternative auto panel value for special devices
     // default = -1, set over config.xml
@@ -548,8 +544,6 @@ public final class PowerManagerService extends IPowerManager.Stub
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_BRIGHTNESS_MODE),
                     false, mSettingsObserver, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.AUTO_BRIGHTNESS_RESPONSIVENESS),
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SYSTEM_POWER_ENABLE_CRT_OFF),
                     false, mSettingsObserver, UserHandle.USER_ALL);
@@ -1003,6 +997,10 @@ public final class PowerManagerService extends IPowerManager.Stub
                     setKeyboardLight(false, 1);
                     setKeyboardLight(false, 2);
                 }
+                synchronized (mLock) {
+                    mDirty |= DIRTY_USER_ACTIVITY;
+                    updatePowerStateLocked();
+                }
             }
         }
     }
@@ -1344,7 +1342,7 @@ public final class PowerManagerService extends IPowerManager.Stub
                 Settings.System.WAKEUP_WHEN_PLUGGED_UNPLUGGED, 1) == 0) {
             return false;
         }
- 
+
         // If we are in FPO mode, we need to sleep.
         if (isFastPowerOnActive()) {
             return false;
@@ -1817,10 +1815,7 @@ public final class PowerManagerService extends IPowerManager.Stub
 
             mDisplayPowerRequest.blockScreenOn = mScreenOnBlocker.isHeld();
 
-            mDisplayPowerRequest.responsitivityFactor = mAutoBrightnessResponsitivityFactor;
-
             mDisplayPowerRequest.electronBeamOffEnabled = mElectronBeamOffEnabled;
-
             mDisplayPowerRequest.electronBeamMode = mElectronBeamMode;
 
             mDisplayPowerRequest.responsitivityFactor = mAutoBrightnessResponsitivityFactor;
