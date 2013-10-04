@@ -8865,6 +8865,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean removedForAllUsers = false;
         boolean systemUpdate = false;
 
+        synchronized (mPackages) {
+            PackageParser.Package p = mPackages.get(packageName);
+            if (p != null) {
+                info.isThemeApk = p.mIsThemeApk;
+                if (info.isThemeApk &&
+                    !info.isRemovedPackageSystemUpdate) {
+                    deleteLockedZipFileIfExists(p.mPath);
+                }
+            }
+        }
+ 
+
         // for the uninstall-updates case and restricted profiles, remember the per-
         // userhandle installed state
         int[] allUsers;
@@ -8875,17 +8887,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             perUserInstalled = new boolean[allUsers.length];
             for (int i = 0; i < allUsers.length; i++) {
                 perUserInstalled[i] = ps != null ? ps.getInstalled(allUsers[i]) : false;
-            }
-        }
-
-        synchronized (mPackages) {
-            PackageParser.Package p = mPackages.get(packageName);
-            if (p != null) {
-                info.isThemeApk = p.mIsThemeApk;
-                if (info.isThemeApk &&
-                    !info.isRemovedPackageSystemUpdate) {
-                    deleteLockedZipFileIfExists(p.mPath);
-                }
             }
         }
 
