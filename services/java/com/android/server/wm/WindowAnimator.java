@@ -260,20 +260,20 @@ public class WindowAnimator {
                         mService.mFocusMayChange = true;
                     }
                     if (transparent == 3) {
-                     if (win.isReadyForDisplay()) {
-                        if (nowAnimating) {
-                            if (winAnimator.mAnimationIsEntrance) {
-                                mForceHiding = KEYGUARD_ANIMATING_IN;
+                        if (win.isReadyForDisplay()) {
+                            if (nowAnimating) {
+                                if (winAnimator.mAnimationIsEntrance) {
+                                    mForceHiding = KEYGUARD_ANIMATING_IN;
+                                } else {
+                                    mForceHiding = KEYGUARD_ANIMATING_OUT;
+                                }
                             } else {
-                                mForceHiding = KEYGUARD_ANIMATING_OUT;
+                                mForceHiding = KEYGUARD_SHOWN;
                             }
-                        } else {
-                            mForceHiding = KEYGUARD_SHOWN;
                         }
-                      }
-                     }else {
-                          mForceHiding = KEYGUARD_NOT_SHOWN;
-                     }
+                    } else {
+                        mForceHiding = KEYGUARD_NOT_SHOWN;
+                    }
                     if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
                             "Force hide " + mForceHiding
                             + " hasSurface=" + win.mHasSurface

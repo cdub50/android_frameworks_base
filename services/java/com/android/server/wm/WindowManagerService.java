@@ -265,6 +265,9 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Amount of time (in milliseconds) to delay before declaring a window freeze timeout. */
     static final int WINDOW_FREEZE_TIMEOUT_DURATION = 2000;
 
+    /** Fraction of animation at which the recents thumbnail becomes completely transparent */
+    static final float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.25f;
+
     /**
      * If true, the window manager will do its own custom freezing and general
      * management of the screen during rotation.
@@ -291,6 +294,8 @@ public class WindowManagerService extends IWindowManager.Stub
     final private KeyguardDisableHandler mKeyguardDisableHandler;
 
     private final boolean mHeadless;
+
+    private static final float THUMBNAIL_ANIMATION_DECELERATE_FACTOR = 1.5f;
 
     private BroadcastReceiver mThemeChangeReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -5118,7 +5123,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 boolean haveWallpaper = false;
                 boolean wallpaperEnabled = mContext.getResources().getBoolean(
                         com.android.internal.R.bool.config_enableWallpaperService)
-                        && !mOnlyCore;
+                        && !mOnlyCore &&
+                        !"0".equals(SystemProperties.get("persist.sys.wallpaperservice", "1"));
                 boolean haveKeyguard = true;
                 // TODO(multidisplay): Expand to all displays?
                 final WindowList windows = getDefaultWindowListLocked();
@@ -6484,8 +6490,6 @@ public class WindowManagerService extends IWindowManager.Stub
             displayInfo.getAppMetrics(mDisplayMetrics, null);
             mDisplayManagerService.setDisplayInfoOverrideFromWindowManager(
                     displayContent.getDisplayId(), displayInfo);
-
-            mAnimator.setDisplayDimensions(m.dw, m.dh, m.appWidth, m.appHeight);
         }
 
         if (false) {
@@ -6496,64 +6500,27 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean computeScreenConfigurationLocked(Configuration config) {
-        if (!mDisplayReady) {
-            return false;
-        }
-
         // TODO(multidisplay): For now, apply Configuration to main screen only.
         final DisplayContent displayContent = getDefaultDisplayContentLocked();
 
-        // Use the effective "visual" dimensions based on current rotation
-        final boolean rotated = (mRotation == Surface.ROTATION_90
-                || mRotation == Surface.ROTATION_270);
-        final int realdw = rotated ?
-                displayContent.mBaseDisplayHeight : displayContent.mBaseDisplayWidth;
-        final int realdh = rotated ?
-                displayContent.mBaseDisplayWidth : displayContent.mBaseDisplayHeight;
-        int dw = realdw;
-        int dh = realdh;
+        // Update application display metrics.
+        final ApplicationDisplayMetrics appDm = updateApplicationDisplayMetricsLocked(
+                displayContent);
 
-        if (mAltOrientation) {
-            if (realdw > realdh) {
-                // Turn landscape into portrait.
-                int maxw = (int)(realdh/1.3f);
-                if (maxw < realdw) {
-                    dw = maxw;
-                }
-            } else {
-                // Turn portrait into landscape.
-                int maxh = (int)(realdw/1.3f);
-                if (maxh < realdh) {
-                    dh = maxh;
-                }
-            }
+        if (appDm == null) {
+            return false;
         }
+
+        final boolean rotated = appDm.rotated;
+        final int dw = appDm.dw;
+        final int dh = appDm.dh;
 
         if (config != null) {
             config.orientation = (dw <= dh) ? Configuration.ORIENTATION_PORTRAIT :
                     Configuration.ORIENTATION_LANDSCAPE;
         }
 
-        // Update application display metrics.
-        final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
-        final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        synchronized(displayContent.mDisplaySizeLock) {
-            displayInfo.rotation = mRotation;
-            displayInfo.logicalWidth = dw;
-            displayInfo.logicalHeight = dh;
-            displayInfo.logicalDensityDpi = displayContent.mBaseDisplayDensity;
-            displayInfo.appWidth = appWidth;
-            displayInfo.appHeight = appHeight;
-            displayInfo.getLogicalMetrics(mRealDisplayMetrics, null);
-            displayInfo.getAppMetrics(mDisplayMetrics, null);
-            mDisplayManagerService.setDisplayInfoOverrideFromWindowManager(
-                    displayContent.getDisplayId(), displayInfo);
-        }
-        if (false) {
-            Slog.i(TAG, "Set app display size: " + appWidth + " x " + appHeight);
-        }
-
         final DisplayMetrics dm = mDisplayMetrics;
         mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(dm,
                 mCompatDisplayMetrics);
@@ -9070,10 +9037,32 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_ORIENTATION &&
                         winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
                         TAG, "Resizing " + win + " WITH DRAW PENDING");
-                win.mClient.resized(win.mFrame, win.mLastOverscanInsets, win.mLastContentInsets,
-                        win.mLastVisibleInsets,
-                        winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
-                        configChanged ? win.mConfiguration : null);
+                final boolean reportDraw
+                        = winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING;
+                final Configuration newConfig = configChanged ? win.mConfiguration : null;
+                if (win.mClient instanceof IWindow.Stub) {
+                    // Simulate one-way call if win.mClient is a local object.
+                    final IWindow client = win.mClient;
+                    final Rect frame = win.mFrame;
+                    final Rect overscanInsets = win.mLastOverscanInsets;
+                    final Rect contentInsets = win.mLastContentInsets;
+                    final Rect visibleInsets = win.mLastVisibleInsets;
+                    mH.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                client.resized(frame, overscanInsets, contentInsets, visibleInsets,
+                                               reportDraw, newConfig);
+                            } catch (RemoteException e) {
+                                // Actually, it's not a remote call.
+                                // RemoteException mustn't be raised.
+                            }
+                        }
+                    });
+                } else {
+                    win.mClient.resized(win.mFrame, win.mLastOverscanInsets, win.mLastContentInsets, win.mLastVisibleInsets,
+                                        reportDraw, newConfig);
+                }
                 win.mOverscanInsetsChanged = false;
                 win.mContentInsetsChanged = false;
                 win.mVisibleInsetsChanged = false;
