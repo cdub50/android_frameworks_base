@@ -38,6 +38,7 @@ public class WifiNative {
 
     private static final boolean DBG = false;
     private final String mTAG;
+
     private static final int DEFAULT_GROUP_OWNER_INTENT     = 6;
 
     static final int BLUETOOTH_COEXISTENCE_MODE_ENABLED     = 0;
@@ -223,7 +224,6 @@ public class WifiNative {
     public boolean stopDriver() {
         return doBooleanCommand("DRIVER STOP");
     }
-
 
     /**
      * Start filtering out Multicast V4 packets
@@ -413,7 +413,6 @@ public class WifiNative {
         if (TextUtils.isEmpty(pin)) return false;
         return doBooleanCommand("WPS_PIN interface=" + iface + " any " + pin);
     }
-
 
     public String startWpsPinDisplay(String bssid) {
         if (TextUtils.isEmpty(bssid)) {
