@@ -25,11 +25,11 @@ import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
-import android.content.ContentResolver; 
+import android.content.ContentResolver;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.text.format.DateFormat;
 import android.provider.Settings;
+import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.Gravity;
@@ -62,6 +62,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         "com.google.android.apps.dashclock",
         "net.nurik.roman.dashclock"
     };
+
+    private static final int FLAG_HAS_LOCAL_HOUR = 0x1;
+    private static final int FLAG_HAS_LOCAL_MINUTE = 0x2;
 
     protected KeyguardViewStateManager mViewStateManager;
     private LockPatternUtils mLockPatternUtils;
@@ -147,14 +150,14 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         if (newPage instanceof ViewGroup) {
             ViewGroup vg = (ViewGroup) newPage;
             if (vg.getChildAt(0) instanceof KeyguardStatusView) {
-                showingStatusWidget = true;
+                showingClock = true;
             } else if (vg.getChildAt(0) instanceof AppWidgetHostView) {
                 AppWidgetProviderInfo info =
                         ((AppWidgetHostView) vg.getChildAt(0)).getAppWidgetInfo();
                 String widgetPackage = info.provider.getPackageName();
                 for (String packageName : CLOCK_WIDGET_PACKAGES) {
                     if (packageName.equals(widgetPackage)) {
-                        showingStatusWidget = true;
+                        showingClock = true;
                         break;
                     }
                 }

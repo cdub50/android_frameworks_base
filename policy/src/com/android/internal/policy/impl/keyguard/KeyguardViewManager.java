@@ -26,8 +26,8 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.media.AudioManager;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
@@ -50,7 +50,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
-import com.android.internal.util.slim.TorchConstants;
+import com.android.internal.util.liquid.TorchConstants;
 import com.android.internal.widget.LockPatternUtils;
 
 /**
@@ -134,15 +134,14 @@ public class KeyguardViewManager {
         Resources res = mContext.getResources();
         int defaultValue = res.getBoolean(com.android.internal.R.bool.config_enableLockScreenRotation) ? 1 : 0;
         return SystemProperties.getBoolean("lockscreen.rot_override",false)
-                || Settings.System.getInt(
-                        mContext.getContentResolver(),
-                        Settings.System.LOCKSCREEN_AUTO_ROTATE,
-                        defaultValue) == 1;
+                || Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.LOCKSCREEN_AUTO_ROTATE, defaultValue) == 1;
     }
 
     class ViewManagerHost extends FrameLayout {
         public ViewManagerHost(Context context) {
             super(context);
+            setFitsSystemWindows(true);
         }
 
         @Override
@@ -635,5 +634,4 @@ public class KeyguardViewManager {
             mKeyguardView.showCustomIntent(intent);
         }
     }
-
 }

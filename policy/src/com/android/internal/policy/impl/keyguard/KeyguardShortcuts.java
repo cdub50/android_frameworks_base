@@ -36,8 +36,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.internal.util.slim.ButtonsHelper;
-import com.android.internal.util.slim.ButtonConfig;
+import com.android.internal.util.liquid.ButtonsHelper;
+import com.android.internal.util.liquid.ButtonConfig;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
