@@ -407,18 +407,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         }
                     });
         }
-
-        @Override public void onChange(boolean selfChange) {
-            synchronized (mMethodMap) {
-                boolean enabledChanged = false;
-                String newEnabled = mSettings.getEnabledInputMethodsStr();
-                if (!mLastEnabled.equals(newEnabled)) {
-                    mLastEnabled = newEnabled;
-                    enabledChanged = true;
-                }
-                updateFromSettingsLocked(enabledChanged);
-            }
-        }
     }
 
     class ImmsBroadcastReceiver extends android.content.BroadcastReceiver {
