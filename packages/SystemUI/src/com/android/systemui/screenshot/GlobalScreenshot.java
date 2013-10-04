@@ -230,6 +230,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
                      PendingIntent.getActivity(context, 0, chooserIntent, 
                              PendingIntent.FLAG_CANCEL_CURRENT));
 
+            // ScreenShot QuickTrash starts here
             Intent trashIntent = new Intent();
             trashIntent.setClass(context, TrashScreenshot.class);
             trashIntent.putExtra(TrashScreenshot.SCREENSHOT_URI, uri.toString());

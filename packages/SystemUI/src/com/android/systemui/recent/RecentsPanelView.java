@@ -77,7 +77,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.lang.Runtime;
 import java.util.ArrayList;
 import java.lang.Runtime;
 
@@ -113,7 +112,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private ImageView mClearRecentsTL;
     private LinearColorBar mRamUsageBar;
 
-    private long mTotalUsedMemory;
+    private long mFreeMemory;
     private long mTotalMemory;
     private long mCachedMemory;
     private long mActiveMemory;
@@ -320,22 +319,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         mSettingsObserver = new SettingsObserver(mHandler);
     }
 
-    @Override
-    protected void onAttachedToWindow () {
-        super.onAttachedToWindow();
-        final ViewRootImpl root = getViewRootImpl();
-        if (root != null) {
-            root.setDrawDuringWindowsAnimating(true);
-        }
-        mSettingsObserver.observe(); // observe will call updateSettings()
-    }
-
-    @Override
-    protected void onDetachedFromWindow () {
-        mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
-        super.onDetachedFromWindow();
-    }
-
     public int numItemsInOneScreenful() {
         if (mRecentsContainer instanceof RecentsScrollView){
             RecentsScrollView scrollView
@@ -432,6 +415,21 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 mPopup.dismiss();
             }
         }
+    }
+
+    protected void onAttachedToWindow () {
+        super.onAttachedToWindow();
+        final ViewRootImpl root = getViewRootImpl();
+        if (root != null) {
+            root.setDrawDuringWindowsAnimating(true);
+        }
+        mSettingsObserver.observe(); // observe will call updateSettings()
+    }
+
+    @Override
+    protected void onDetachedFromWindow () {
+        mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
+        super.onDetachedFromWindow();
     }
 
     public void onUiHidden() {
@@ -531,7 +529,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
         mRecentsScrim = findViewById(R.id.recents_bg_protect);
         mRecentsNoApps = findViewById(R.id.recents_no_apps);
-
 
         mClearRecentsBR = (ImageView) findViewById(R.id.recents_clear_BR);
         mClearRecentsBR.setOnClickListener(new OnClickListener() {
@@ -1057,7 +1054,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     Intent intent = new Intent();
                     intent.setComponent(new ComponentName(
                             "com.android.settings",
-                            "com.android.settings.Settings$ASSRamBarActivity"));
+                            "com.android.settings.Settings$RamBarActivity"));
 
                     try {
                         // Dismiss the lock screen when Settings starts.
@@ -1072,7 +1069,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     return true;
                 }
             });
-
         } else if (mRamUsageBar != null) {
             mRamUsageBar.setVisibility(View.GONE);
         }
@@ -1100,7 +1096,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 }
             }
         } catch (IOException e) {}
-        mTotalUsedMemory = result;
+        mFreeMemory = result;
 
         try {
             String firstLine = readLine("/proc/meminfo", 6);
@@ -1123,7 +1119,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             }
         } catch (IOException e) {}
         mCachedMemory = result;
-
     }
 
     private static String readLine(String filename, int line) throws IOException {
