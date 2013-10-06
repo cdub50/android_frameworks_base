@@ -362,8 +362,7 @@ public class WifiStateMachine extends StateMachine {
     /* Get supported channels */
     public static final int CMD_GET_SUPPORTED_CHANNELS    = BASE + 135;
 
-    private static final int CONNECT_MODE   = 1;
-    private static final int SCAN_ONLY_MODE = 2;
+    public static final int CMD_BOOT_COMPLETED            = BASE + 136;
 
     public static final int CONNECT_MODE                   = 1;
     public static final int SCAN_ONLY_MODE                 = 2;
@@ -775,8 +774,6 @@ public class WifiStateMachine extends StateMachine {
     public void setSupplicantRunning(boolean enable) {
         if (enable) {
             WifiNative.setMode(0);
-            /* Argument is the state that is entered prior to load */
-            sendMessage(obtainMessage(CMD_LOAD_DRIVER, WIFI_STATE_ENABLING, 0));
             sendMessage(CMD_START_SUPPLICANT);
         } else {
             mWifiConfigStore.setStateFromAutoConnectAllNetworks();
@@ -790,8 +787,6 @@ public class WifiStateMachine extends StateMachine {
     public void setHostApRunning(WifiConfiguration wifiConfig, boolean enable) {
         if (enable) {
             WifiNative.setMode(1);
-            /* Argument is the state that is entered prior to load */
-            sendMessage(obtainMessage(CMD_LOAD_DRIVER, WIFI_AP_STATE_ENABLING, 0));
             sendMessage(obtainMessage(CMD_START_AP, wifiConfig));
         } else {
             sendMessage(CMD_STOP_AP);

@@ -474,8 +474,6 @@ public class Notification implements Parcelable
     /** @hide */
     public static final String EXTRA_PEOPLE = "android.people";
 
-    private Bundle extras;
-
     /**
      * Structure to encapsulate an "action", including title and icon, that can be attached to a Notification.
      * @hide

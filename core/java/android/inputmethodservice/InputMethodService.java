@@ -1607,14 +1607,6 @@ public class InputMethodService extends AbstractInputMethodService {
         }
     };
 
-    final Runnable restoreAutoRotation = new Runnable() {
-        @Override public void run() {
-            Settings.System.putInt(getContentResolver(),
-                    Settings.System.ACCELEROMETER_ROTATION, 0);
-            mForcedAutoRotate = false;
-        }
-    };
-
     /**
      * Called when the input method window has been shown to the user, after
      * previously not being visible.  This is done after all of the UI setup

@@ -3258,6 +3258,12 @@ public final class Settings {
         public static final String RECENTS_RAM_BAR_ACTIVE_APPS_COLOR = "recents_ram_bar_active_apps_color";
 
         /**
+         * Key to store Torch state.
+         * @hide 
+         */
+        public static final String TORCH_STATE = "torch_state";
+
+        /**
          * Choose position of clear button on recents window
          * @hide
          */
@@ -3924,13 +3930,6 @@ public final class Settings {
          * @hide
          */
         public static final String LOCKSCREEN_USE_WIDGET_CONTAINER_CAROUSEL = "lockscreen_use_widget_container_carousel";
-
-        /**
-         * Whether music controls should be shown on the lockscreen if a supporting
-         * music player is active.
-         * @hide
-         */
-        public static final String LOCKSCREEN_MUSIC_CONTROLS = "lockscreen_music_controls";
 
         /**
          * Notifications Expand Behavior
