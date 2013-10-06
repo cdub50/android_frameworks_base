@@ -110,6 +110,9 @@
     <!-- label for item that opens the profile choosing dialog -->
     <string name="global_action_choose_profile">Profile</string>
 
+    <!-- label for item that torches in phone options dialog -->
+    <string name="global_action_torch">Torch</string>
+
     <!-- In WiFi AP notification -->
     <string name="notify_turn_wifi_ap_off_title">Turn Wi-Fi AP off</string>
 
@@ -145,6 +148,9 @@
     <string name="permdesc_sendMockSms">Allows the app to send mock SMS messages.
         This allows an app send SMS to trusted applications. Malicious apps could send messages
         continuously, blocking the device notification system and disrupting the user.</string>
+
+    <!-- Stylus gestures support -->
+    <string name="stylus_app_not_installed">%s is not installed</string>
 
     <!-- Options that show upon long-pressing a key on the physical keyboard -->
     <string name="symbol_picker_A">\u00C0\u00C1\u00C2\u00C4\u00C6\u00C3\u00C5\u0104\u0100</string>
