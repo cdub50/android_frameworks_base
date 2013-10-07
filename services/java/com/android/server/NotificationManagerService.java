@@ -211,8 +211,6 @@ public class NotificationManagerService extends INotificationManager.Stub
             = new HashSet<ComponentName>();
     // Just the packages from mEnabledListenersForCurrentUser
     private HashSet<String> mEnabledListenerPackageNames = new HashSet<String>();
-    private HashMap<String, Long> mAnnoyingNotifications = new HashMap<String, Long>();
-    private long mAnnoyingNotificationThreshold = -1;
 
     // Notification control database. For now just contains disabled packages.
     private AtomicFile mPolicyFile;
@@ -1168,6 +1166,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             boolean queryRestart = false;
             boolean queryRemove = false;
             boolean packageChanged = false;
+            boolean cancelNotifications = true;
 
             if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
@@ -1481,6 +1480,28 @@ public class NotificationManagerService extends INotificationManager.Stub
         qhObserver.observe();
         LEDSettingsObserver ledObserver = new LEDSettingsObserver(mHandler);
         ledObserver.observe();
+    }
+
+    /**
+     * Read the old XML-based app block database and import those blockages into the AppOps system.
+     */
+    private void importOldBlockDb() {
+        loadBlockDb();
+
+        PackageManager pm = mContext.getPackageManager();
+        for (String pkg : mBlockedPackages) {
+            PackageInfo info = null;
+            try {
+                info = pm.getPackageInfo(pkg, 0);
+                setNotificationsEnabledForPackage(pkg, info.applicationInfo.uid, false);
+            } catch (NameNotFoundException e) {
+                // forget you
+            }
+        }
+        mBlockedPackages.clear();
+        if (mPolicyFile != null) {
+            mPolicyFile.delete();
+        }
     }
 
     void systemReady() {
@@ -2040,25 +2061,6 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
 
         idOut[0] = id;
-    }
-
-    private boolean notificationIsAnnoying(String pkg) {
-        if (mAnnoyingNotificationThreshold <= 0)
-            return false;
-
-        if("android".equals(pkg))
-            return false;
-
-        long currentTime = System.currentTimeMillis();
-        if (mAnnoyingNotifications.containsKey(pkg)
-                && (currentTime - mAnnoyingNotifications.get(pkg) < mAnnoyingNotificationThreshold)) {
-            // less than threshold; it's an annoying notification!!
-            return true;
-        } else {
-            // not in map or time to re-add
-            mAnnoyingNotifications.put(pkg, currentTime);
-            return false;
-        }
     }
 
     private boolean shouldConvertSoundToVibration() {

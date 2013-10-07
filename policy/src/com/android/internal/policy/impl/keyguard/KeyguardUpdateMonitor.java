@@ -763,6 +763,10 @@ public class KeyguardUpdateMonitor {
         return mKeyguardIsVisible;
     }
 
+    public boolean isSwitchingUser() {
+        return mSwitchingUser;
+    }
+
     private static boolean isBatteryUpdateInteresting(BatteryStatus old, BatteryStatus current, Context context) {
         final boolean nowPluggedIn = current.isPluggedIn();
         final boolean wasPluggedIn = old.isPluggedIn();

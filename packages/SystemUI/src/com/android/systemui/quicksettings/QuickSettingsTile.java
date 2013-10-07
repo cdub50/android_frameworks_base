@@ -69,6 +69,8 @@ public class QuickSettingsTile implements OnClickListener {
     protected PhoneStatusBar mStatusbarService;
     protected QuickSettingsController mQsc;
 
+    private Handler mHandler = new Handler();
+
     public QuickSettingsTile(Context context, LayoutInflater inflater,
             QuickSettingsContainerView container, QuickSettingsController qsc) {
         mContext = context;
@@ -206,3 +208,4 @@ public class QuickSettingsTile implements OnClickListener {
         return name;
     }
 }
+

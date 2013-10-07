@@ -51,11 +51,6 @@ class QuickSettingsBasicTile extends QuickSettingsTileView {
         mImageView = (ImageView) findViewById(R.id.image);
     }
 
-    @Override
-    void setContent(int layoutId, LayoutInflater inflater) {
-        throw new RuntimeException("why?");
-    }
-
     public ImageView getImageView() {
         return mImageView;
     }
@@ -80,3 +75,4 @@ class QuickSettingsBasicTile extends QuickSettingsTileView {
         mTextView.setText(resId);
     }
 }
+

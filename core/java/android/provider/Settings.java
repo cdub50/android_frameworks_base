@@ -2617,12 +2617,6 @@ public final class Settings {
         public static final String SIP_ASK_ME_EACH_TIME = "SIP_ASK_ME_EACH_TIME";
 
         /**
-         * Status Bar notification icon opacity
-         * @hide
-         */
-        public static final String STATUS_BAR_NOTIFICATION_ICON_OPACITY = "status_bar_notification_icon_opacity";
-
-        /**
          * Pointer speed setting.
          * This is an integer value in a range between -7 and +7, so there are 15 possible values.
          *   -7 = slowest
@@ -3276,11 +3270,10 @@ public final class Settings {
         public static final String DISABLE_FULLSCREEN_KEYBOARD = "disable_fullscreen_keyboard";
 
         /**
-         * Whether Status bar should be hiidden when there are no
-         * notifications
+         * Whether Status bar should be hiidden when there are no notifications
          * @hide
          */
-        public static final String AUTO_HIDE_STATUSBAR = "auto_hide_statusbar";
+        public static final String AUTO_HIDE_STATUSBAR = "status_bar_auto_hide";
 
         /**
          * Whether Status Bar is currently hidden or not
@@ -3298,11 +3291,9 @@ public final class Settings {
 
         /**
          * Peek at stausbar when it is hidden by swiping down from top
-         * end of the screen
-         *
          * @hide
          */
-        public static final String STATUSBAR_PEEK = "statusbar_peek";
+        public static final String STATUSBAR_PEEK = "status_bar_quick_peek";
 
          /**
          * Whether Expanded desktop is currently running or not
@@ -3909,6 +3900,11 @@ public final class Settings {
         public static final String LOCKSCREEN_CAMERA_WIDGET = "lockscreen_camera_widget";
 
         /**
+         * @hide
+         */
+        public static final String LOCKSCREEN_CUSTOM_TEXT_COLOR = "lockscreen_custom_text_color";
+
+        /**
          * Weather to minimize lockscreen challenge on screen turned on
          * @hide
          */
@@ -3921,15 +3917,31 @@ public final class Settings {
         public static final String LOCKSCREEN_HIDE_INITIAL_PAGE_HINTS = "lockscreen_hide_initial_page_hints";
 
         /**
+         * Enable longpress on expand challenge handle to unlock
+         * @hide
+         */
+        public static final String LOCKSCREEN_LONGPRESS_CHALLENGE = "lockscreen_longpress_challenge";
+
+        /**
          * @hide
          */
         public static final String LOCKSCREEN_ALL_WIDGETS = "lockscreen_all_widgets";
+
+        /**
+         * @hide
+         */
+        public static final String LOCKSCREEN_UNLIMITED_WIDGETS = "lockscreen_unlimited_widgets";
 
         /**
          * Whether to use the carousel as widget container on portrait view
          * @hide
          */
         public static final String LOCKSCREEN_USE_WIDGET_CONTAINER_CAROUSEL = "lockscreen_use_widget_container_carousel";
+
+        /**
+         * @hide
+         */
+        public static final String LOCKSCREEN_GLOW_TORCH = "lockscreen_glow_torch";
 
         /**
          * Notifications Expand Behavior
@@ -4282,7 +4294,38 @@ public final class Settings {
          *
          * @hide
          */
-        public static final String ICON_COLOR_BEHAVIOR = "icon_color_behavior";
+        public static final String ICON_COLOR_BEHAVIOR = "status_icon_color_behavior";
+
+        /**
+         * Show the pending notification counts as overlays on the status bar
+         * @hide
+         */
+        public static final String STATUS_BAR_NOTIFICATION_COUNT = "status_bar_notification_count";
+
+        /**
+         * Status Bar notification icon opacity
+         * @hide
+         */
+        public static final String STATUS_BAR_NOTIF_ICON_OPACITY = "status_bar_icon_opacity";
+
+        /**
+         * wake up when plugged or unplugged
+         *
+         * @hide
+         */
+        public static final String WAKEUP_WHEN_PLUGGED_UNPLUGGED = "wakeup_when_plugged_unplugged";
+
+        /**  
+         * Give MMS Notifications a breathing effect
+         * @hide
+         */
+        public static final String MMS_BREATH = "mms_breath";
+
+        /**  
+         * Give MMS Notifications a breathing effect
+         * @hide
+         */
+        public static final String MISSED_CALL_BREATH = "missed_call_breath";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

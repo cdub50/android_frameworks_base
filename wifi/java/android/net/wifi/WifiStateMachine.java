@@ -787,7 +787,7 @@ public class WifiStateMachine extends StateMachine {
     public void setHostApRunning(WifiConfiguration wifiConfig, boolean enable) {
         if (enable) {
             WifiNative.setMode(1);
-            sendMessage(obtainMessage(CMD_START_AP, wifiConfig));
+            sendMessage(CMD_START_AP, wifiConfig);
         } else {
             sendMessage(CMD_STOP_AP);
         }

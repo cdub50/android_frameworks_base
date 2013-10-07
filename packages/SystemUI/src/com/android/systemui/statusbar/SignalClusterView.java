@@ -45,7 +45,6 @@ public class SignalClusterView
     static final String TAG = "SignalClusterView";
 
     NetworkController mNC;
-    private SettingsObserver mObserver;
 
     private static final int SIGNAL_CLUSTER_STYLE_NORMAL = 0;
 
@@ -59,6 +58,7 @@ public class SignalClusterView
     private boolean mEtherVisible = false;
     private int mEtherIconId = 0;
     private String mWifiDescription, mMobileDescription, mMobileTypeDescription, mEtherDescription;
+
     private boolean customColor;
     private int color = 0;
 
@@ -116,8 +116,6 @@ public class SignalClusterView
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        mObserver.observe();
-
         mWifiGroup      = (ViewGroup) findViewById(R.id.wifi_combo);
         mWifi           = (ImageView) findViewById(R.id.wifi_signal);
         mWifiActivity   = (ImageView) findViewById(R.id.wifi_inout);
@@ -135,8 +133,6 @@ public class SignalClusterView
 
     @Override
     protected void onDetachedFromWindow() {
-        mObserver.unobserve();
-
         mWifiGroup      = null;
         mWifi           = null;
         mWifiActivity   = null;
@@ -215,7 +211,6 @@ public class SignalClusterView
         if (mWifiActivity != null) {
             mWifiActivity.setImageDrawable(null);
         }
-
         if (mMobile != null) {
             mMobile.setImageDrawable(null);
         }
@@ -225,8 +220,7 @@ public class SignalClusterView
         if (mMobileType != null) {
             mMobileType.setImageDrawable(null);
         }
-
-        if(mAirplane != null) {
+        if (mAirplane != null) {
             mAirplane.setImageDrawable(null);
         }
 
@@ -354,3 +348,4 @@ public class SignalClusterView
                 Settings.System.ICON_COLOR_BEHAVIOR, 0) == 1;
     }
 }
+
