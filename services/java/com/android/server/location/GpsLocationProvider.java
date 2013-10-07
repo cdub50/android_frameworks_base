@@ -319,7 +319,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private final IBatteryStats mBatteryStats;
 
     // only modified on handler thread
-    private int[] mClientUids = new int[0];
+    private WorkSource mClientSource = new WorkSource();
+
+    private GeofenceHardwareImpl mGeofenceHardwareImpl;
 
     private final IGpsStatusProvider mGpsStatusProvider = new IGpsStatusProvider.Stub() {
         @Override
@@ -1325,7 +1327,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     if (DEBUG) Log.d(TAG, "PhoneConstants.APN_REQUEST_STARTED");
                     // Nothing to do here
                 } else {
-                    if (DEBUG) Log.d(TAG, "startUsingNetworkFeature failed");
+                    if (DEBUG) Log.d(TAG, "startUsingNetworkFeature failed, value is " +
+                                     result);
                     mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
                     native_agps_data_conn_failed();
                 }
@@ -1799,4 +1802,13 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     private native void native_update_network_state(boolean connected, int type,
             boolean roaming, boolean available, String extraInfo, String defaultAPN);
+
+    // Hardware Geofence support.
+    private static native boolean native_is_geofence_supported();
+    private static native boolean native_add_geofence(int geofenceId, double latitude,
+            double longitude, double radius, int lastTransition,int monitorTransitions,
+            int notificationResponsivenes, int unknownTimer);
+    private static native boolean native_remove_geofence(int geofenceId);
+    private static native boolean native_resume_geofence(int geofenceId, int transitions);
+    private static native boolean native_pause_geofence(int geofenceId);
 }

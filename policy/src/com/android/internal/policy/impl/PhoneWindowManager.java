@@ -22,6 +22,7 @@ import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.IUiModeManager;
 import android.app.KeyguardManager;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
@@ -98,7 +99,11 @@ import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.VolumePanel;
 import android.widget.Toast;
+import android.media.IAudioService;
+import android.media.AudioService;
+import android.media.AudioManager;
 
 import com.android.internal.R;
 import com.android.internal.app.ThemeUtils;
@@ -1733,7 +1738,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 updateRotation = true;
             }
         }
-
         if (updateRotation) {
             updateRotation(true);
         } else if (updateDisplayMetrics) {
@@ -2078,27 +2082,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation) {
-        if (mHasNavigationBar && !expandedDesktopHidesNavigationBar()) {
-            // For a basic navigation bar, when we are in landscape mode we place
-            // the navigation bar to the side.
-            if (mNavigationBarCanMove && fullWidth > fullHeight) {
-                return fullWidth - mNavigationBarWidthForRotation[rotation];
-            }
+        // For a basic navigation bar, when we are in landscape mode we place
+        // the navigation bar to the side.
+        if (mNavigationBarCanMove && fullWidth > fullHeight) {
+            return fullWidth - mNavigationBarWidthForRotation[rotation];
         }
         return fullWidth;
     }
 
     public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation) {
-        if (mHasSystemNavBar && !expandedDesktopHidesNavigationBar()) {
+        if (mHasSystemNavBar) {
             // For the system navigation bar, we always place it at the bottom.
             return fullHeight - mNavigationBarHeightForRotation[rotation];
         }
-        if (mHasNavigationBar && !expandedDesktopHidesNavigationBar()) {
-            // For a basic navigation bar, when we are in portrait mode we place
-            // the navigation bar to the bottom.
-            if (!mNavigationBarCanMove || fullWidth < fullHeight) {
-                return fullHeight - mNavigationBarHeightForRotation[rotation];
-            }
+        // For a basic navigation bar, when we are in portrait mode we place
+        // the navigation bar to the bottom.
+        if (!mNavigationBarCanMove || fullWidth < fullHeight) {
+            return fullHeight - mNavigationBarHeightForRotation[rotation];
         }
         return fullHeight;
     }
@@ -2555,7 +2555,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return timeoutTime - now;
                 }
             }
-
             if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
                     && mVolumeDownKeyConsumedByChord) {
                 if (!down) {
@@ -3417,8 +3416,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // For purposes of putting out fake window up to steal focus, we will
             // drive nav being hidden only by whether it is requested.
             boolean navVisible = (mLastSystemUiFlags&View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
-            int navWidth = mNavigationBarWidthForRotation[displayRotation];
-            int navHeight = mNavigationBarHeightForRotation[displayRotation];
+	    int navWidth = mNavigationBarWidthForRotation[displayRotation];
 
             // When the navigation bar isn't visible, we put up a fake
             // input window to catch all touch events.  This way we can
@@ -3439,15 +3437,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // For purposes of positioning and showing the nav bar, if we have
             // decided that it can't be hidden (because of the screen aspect ratio),
             // then take that into account.
-            if (expandedDesktopHidesNavigationBar()
-                    && (mLastSystemUiFlags & View.SYSTEM_UI_FLAG_SHOW_NAVIGATION_IN_EXPANDED_DESKTOP) == 0) {
-                navVisible = false;
-                navWidth = 0;
-                navHeight = 0;
-            } else if (!mCanHideNavigationBar) {
-                navVisible = true;
-            }
-
+            navVisible |= !mCanHideNavigationBar;
             if (mNavigationBar != null) {
                 // Force the navigation bar to its appropriate place and
                 // size.  We need to do this directly, instead of relying on
@@ -3456,12 +3446,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mNavigationBarOnBottom = (!mNavigationBarCanMove || displayWidth < displayHeight);
                 if (mNavigationBarOnBottom) {
                     // It's a system nav bar or a portrait screen; nav bar goes on bottom.
-                    int top = displayHeight - navHeight;
-                    mTmpNavigationFrame.set(0, top, displayWidth, displayHeight);
+                    int top = displayHeight - overscanBottom
+                            - mNavigationBarHeightForRotation[displayRotation];
+                    mTmpNavigationFrame.set(0, top, displayWidth, displayHeight - overscanBottom);
                     mStableBottom = mStableFullscreenBottom = mTmpNavigationFrame.top;
                     if (navVisible) {
                         mNavigationBar.showLw(true);
                         mSystemBottom = mDockBottom = mTmpNavigationFrame.bottom - mDockTop;
+                        mDockBottom = mTmpNavigationFrame.top;
+                        mRestrictedScreenHeight = mDockBottom - mRestrictedScreenTop;
+                        mRestrictedOverscanScreenHeight = mDockBottom - mRestrictedOverscanScreenTop;
                     } else {
                         // We currently want to hide the navigation UI.
                         mNavigationBar.hideLw(true);
@@ -3475,12 +3469,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 } else {
                     // Landscape screen; nav bar goes to the right.
-                    int left = displayWidth - navWidth;
-                    mTmpNavigationFrame.set(left, 0, displayWidth, displayHeight);
+                    int left = displayWidth - overscanRight - navWidth;
+                    mTmpNavigationFrame.set(left, 0, displayWidth - overscanRight, displayHeight);
                     mStableRight = mStableFullscreenRight = mTmpNavigationFrame.left;
                     if (navVisible) {
                         mNavigationBar.showLw(true);
                         mSystemRight = mDockRight = mTmpNavigationFrame.left - mDockLeft;
+                        mDockRight = mTmpNavigationFrame.left;
+                        mRestrictedScreenWidth = mDockRight - mRestrictedScreenLeft;
+                        mRestrictedOverscanScreenWidth = mDockRight - mRestrictedOverscanScreenLeft;
                     } else {
                         // We currently want to hide the navigation UI.
                         mNavigationBar.hideLw(true);
@@ -4004,30 +4001,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             setLastInputMethodWindowLw(null, null);
             offsetInputMethodWindowLw(win);
         }
-    }
-
-    private boolean expandedDesktopHidesStatusBar() {
-        return mExpandedDesktopStyle == 2;
-    }
-
-    private boolean expandedDesktopHidesNavigationBar() {
-        return mExpandedDesktopStyle != 0;
-    }
-
-    private boolean shouldHideNavigationBarLw(int systemUiVisibility) {
-        if (expandedDesktopHidesNavigationBar()) {
-            if ((systemUiVisibility & View.SYSTEM_UI_FLAG_SHOW_NAVIGATION_IN_EXPANDED_DESKTOP) == 0) {
-                return true;
-            }
-        }
-
-        if (mCanHideNavigationBar) {
-            if ((systemUiVisibility & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private void offsetInputMethodWindowLw(WindowState win) {

@@ -898,12 +898,16 @@ public class AppTransition implements Dump {
     private void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
         for (int i = 0; i < 10; i++) {  
-            mActivityAnimations[i] = Settings.System.getInt(resolver, Settings.System.ACTIVITY_ANIMATION_CONTROLS[i], 0);
+            mActivityAnimations[i] = Settings.System.getInt(resolver,
+                    Settings.System.ACTIVITY_ANIMATION_CONTROLS[i], 0);
         }
 
-        mNoOverrides = Settings.System.getBoolean(resolver, Settings.System.ANIMATION_CONTROLS_NO_OVERRIDE, false);
+        mNoOverrides = (Settings.System.getInt(resolver,
+                Settings.System.ANIMATION_CONTROLS_NO_OVERRIDE, 0)) == 1;
 
-        int temp = Settings.System.getInt(resolver, Settings.System.ANIMATION_CONTROLS_DURATION, 0);
+        int temp = Settings.System.getInt(resolver,
+                Settings.System.ANIMATION_CONTROLS_DURATION, 0);
         mAnimationDuration = temp * 15;
     }
 }
+

@@ -1438,6 +1438,33 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
+    @Override
+    protected void refreshLayout(int layoutDirection) {
+        if (mNavigationBarView != null) {
+            mNavigationBarView.setLayoutDirection(layoutDirection);
+        }
+
+        if (mClearButton != null && mClearButton instanceof ImageView) {
+            // Force asset reloading
+            ((ImageView)mClearButton).setImageDrawable(null);
+            ((ImageView)mClearButton).setImageResource(R.drawable.ic_notify_clear);
+        }
+
+        if (mSettingsButton != null) {
+            // Force asset reloading
+            mSettingsButton.setImageDrawable(null);
+            mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
+        }
+
+        if (mNotificationButton != null) {
+            // Force asset reloading
+            mNotificationButton.setImageDrawable(null);
+            mNotificationButton.setImageResource(R.drawable.ic_notifications);
+        }
+
+        refreshAllStatusBarIcons();
+    }
+
     private void updateShowSearchHoldoff() {
         mShowSearchHoldoff = mContext.getResources().getInteger(
             R.integer.config_show_search_delay);
@@ -2036,11 +2063,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return ;
         }
-        // don't allow expanding via e.g. service call while status bar is hidden
-        // due to expanded desktop
-        if (getExpandedDesktopMode() == 2) {
-            return;
-        }
 
         mNotificationPanel.expand();
         mNotificationPanelIsOpen = true;
@@ -2130,11 +2152,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     public void animateExpandSettingsPanel(boolean flip) {
         if (SPEW) Slog.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
-            return;
-        }
-        // don't allow expanding via e.g. service call while status bar is hidden
-        // due to expanded desktop
-        if (getExpandedDesktopMode() == 2) {
             return;
         }
 
@@ -2788,7 +2805,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         // until status bar window is attached to the window manager,
         // because...  well, what's the point otherwise?  And trying to
         // run a ticker without being attached will crash!
-        if (n.notification.tickerText != null && mStatusBarContainer.getWindowToken() != null) {
+        if (n.getNotification().tickerText != null && mStatusBarContainer.getWindowToken() != null) {
             if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
                             | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
                 mTicker.addEntry(n);

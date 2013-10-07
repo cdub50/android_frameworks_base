@@ -16,11 +16,7 @@
 
 package com.android.server.power;
 
-import java.io.PrintWriter;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-
+import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.opengl.EGL14;
@@ -41,6 +37,11 @@ import android.view.SurfaceSession;
 
 import com.android.server.display.DisplayManagerService;
 import com.android.server.display.DisplayTransactionListener;
+
+import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 
 /**
  * Bzzzoooop!  *crackle*
@@ -137,19 +138,12 @@ final class ElectronBeam {
 
         mMode = mode;
 
-        // Get the display size and adjust it for rotation.
-        mDisplay.getDisplayInfo(mDisplayInfo);
-        mDisplayLayerStack = mDisplay.getLayerStack();
-        mDisplayRotation = (mDisplayInfo.rotation +
-                android.os.SystemProperties.getInt("ro.sf.hwrotation", 0) / 90) % 4;
-        if (mDisplayRotation == Surface.ROTATION_90
-                || mDisplayRotation == Surface.ROTATION_270) {
-            mDisplayWidth = mDisplayInfo.logicalHeight;
-            mDisplayHeight = mDisplayInfo.logicalWidth;
-        } else {
-            mDisplayWidth = mDisplayInfo.logicalWidth;
-            mDisplayHeight = mDisplayInfo.logicalHeight;
-        }
+        // Get the display size and layer stack.
+        // This is not expected to change while the electron beam surface is showing.
+        DisplayInfo displayInfo = mDisplayManager.getDisplayInfo(Display.DEFAULT_DISPLAY);
+        mDisplayLayerStack = displayInfo.layerStack;
+        mDisplayWidth = displayInfo.getNaturalWidth();
+        mDisplayHeight = displayInfo.getNaturalHeight();
 
         // Prepare the surface for drawing.
         if (!tryPrepare()) {
@@ -744,23 +738,23 @@ final class ElectronBeam {
                 DisplayInfo displayInfo = mDisplayManager.getDisplayInfo(Display.DEFAULT_DISPLAY);
                 switch (displayInfo.rotation) {
                     case Surface.ROTATION_0:
-                        mSurface.setPosition(0, 0);
-                        mSurface.setMatrix(1, 0, 0, 1);
+                        mSurfaceControl.setPosition(0, 0);
+                        mSurfaceControl.setMatrix(1, 0, 0, 1);
                         mIsLandscape = false;
                         break;
                     case Surface.ROTATION_90:
-                        mSurface.setPosition(0, displayInfo.logicalHeight);
-                        mSurface.setMatrix(0, -1, 1, 0);
+                        mSurfaceControl.setPosition(0, displayInfo.logicalHeight);
+                        mSurfaceControl.setMatrix(0, -1, 1, 0);
                         mIsLandscape = true;
                         break;
                     case Surface.ROTATION_180:
-                        mSurface.setPosition(displayInfo.logicalWidth, displayInfo.logicalHeight);
-                        mSurface.setMatrix(-1, 0, 0, -1);
+                        mSurfaceControl.setPosition(displayInfo.logicalWidth, displayInfo.logicalHeight);
+                        mSurfaceControl.setMatrix(-1, 0, 0, -1);
                         mIsLandscape = false;
                         break;
                     case Surface.ROTATION_270:
-                        mSurface.setPosition(displayInfo.logicalWidth, 0);
-                        mSurface.setMatrix(0, 1, -1, 0);
+                        mSurfaceControl.setPosition(displayInfo.logicalWidth, 0);
+                        mSurfaceControl.setMatrix(0, 1, -1, 0);
                         mIsLandscape = true;
                         break;
                 }

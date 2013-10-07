@@ -731,3 +731,4 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         onBrightnessLevelChanged();
     }
 }
+

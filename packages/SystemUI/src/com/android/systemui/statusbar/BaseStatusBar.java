@@ -180,9 +180,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         public void run() {
             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
         }
-    };
-
-    protected ActiveDisplayView mActiveDisplayView;  
+    };  
 
     /**
      * An interface for navigation key bars to allow status bars to signal which keys are
@@ -308,6 +306,28 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected Display mDisplay;
 
     private boolean mDeviceProvisioned = false;
+
+    public void collapse() {
+    }
+
+    private boolean mShowNotificationCounts;
+    protected ActiveDisplayView mActiveDisplayView;
+
+    public Handler getHandler() {
+        return mHandler;
+    }
+
+    public IStatusBarService getService() {
+        return mBarService;
+    }
+
+    public NotificationData getNotificationData() {
+        return mNotificationData;
+    }
+
+    public NotificationRowLayout getNotificationRowLayout() {
+        return mPile;
+    }
 
     public IStatusBarService getStatusBarService() {
         return mBarService;

@@ -66,7 +66,8 @@
     <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
     <string name="reboot_progress">Rebooting\u2026</string>
     <!-- Reboot Confirmation Dialog.  When the user chooses to reboot the phone, there will be a confirmation dialog.  This is the message. -->
-    <string name="reboot_confirm">Your phone will reboot.</string>
+    <string name="reboot_confirm" product="tablet">Your tablet will reboot.</string>
+    <string name="reboot_confirm" product="default">Your phone will reboot.</string>
 
     <!-- Reboot Confirmation Dialog.  When the user chooses to reboot the phone, there will
          be a confirmation dialog.  This is the message. -->
@@ -85,6 +86,10 @@
     <string name="permlab_preventpower">prevent power key</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_preventpower">Allows an application to override the power key</string>
+
+    <!-- Superuser application permission, allows applications to call the superuser binary (su) -->
+    <string name="permlab_accessSuperuser">full permissions to all device features and storage</string>
+    <string name="permdesc_accessSuperuser">Superuser grants full access to all device features and storage, including the secure and sensitive hardware elements of your device. This permission is potentially dangerous.</string>
 
     <!-- Title of policy access to start enforcing SELinux policy [CHAR LIMIT=30]-->
     <string name="policylab_enforceSelinux">Enforce SELinux</string>
@@ -223,4 +228,5 @@
     <string name="animation_grow_shrink_left">Grow in (Left)</string>
     <string name="animation_grow_shrink_right">Grow in (Right)</string>
     <string name="action_null">Blank</string>
+
 </resources>

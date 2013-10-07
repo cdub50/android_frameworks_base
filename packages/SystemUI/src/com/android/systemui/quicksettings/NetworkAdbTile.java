@@ -22,10 +22,12 @@ import android.net.NetworkUtils;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -109,3 +111,4 @@ public class NetworkAdbTile extends QuickSettingsTile {
                 Settings.Secure.ADB_PORT, 0) > 0;
     }
 }
+

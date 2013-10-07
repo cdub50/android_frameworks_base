@@ -63,6 +63,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -2825,8 +2826,7 @@ final class ActivityStack {
             launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
         }
 
-        if (r.resultTo != null && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
-                (launchFlags&Intent.FLAG_FLOATING_WINDOW) == 0) {
+        if (r.resultTo != null && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             // For whatever reason this activity is being launched into a new
             // task...  yet the caller has requested a result back.  Well, that
             // is pretty messed up, so instead immediately send back a cancel

@@ -74,4 +74,20 @@ public class QuickSettingsTileView extends FrameLayout {
     public void setContent(int layoutId, LayoutInflater inflater) {
         inflater.inflate(layoutId, this);
     }
+
+    @Override
+    public void setVisibility(int vis) {
+        if (QuickSettings.DEBUG_GONE_TILES) {
+            if (vis == View.GONE) {
+                vis = View.VISIBLE;
+                setAlpha(0.25f);
+                setEnabled(false);
+            } else {
+                setAlpha(1f);
+                setEnabled(true);
+            }
+        }
+        super.setVisibility(vis);
+    }
 }
+
