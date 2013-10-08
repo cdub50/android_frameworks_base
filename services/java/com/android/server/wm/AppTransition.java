@@ -910,4 +910,3 @@ public class AppTransition implements Dump {
         mAnimationDuration = temp * 15;
     }
 }
-

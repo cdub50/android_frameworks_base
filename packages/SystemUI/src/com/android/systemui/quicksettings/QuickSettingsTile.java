@@ -208,4 +208,3 @@ public class QuickSettingsTile implements OnClickListener {
         return name;
     }
 }
-

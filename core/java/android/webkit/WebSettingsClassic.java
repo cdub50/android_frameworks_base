@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.EventLog;
@@ -438,7 +439,17 @@ public class WebSettingsClassic extends WebSettings {
             com.android.internal.R.string.web_user_agent_target_content).toString();
         final String base = context.getResources().getText(
                 com.android.internal.R.string.web_user_agent).toString();
-        return String.format(base, buffer, mobile);
+
+        String liquidtag = "";
+        final String liquidversion = SystemProperties.get("ro.liquid.version");
+        if (liquidversion != null && liquidversion.length() > 0) {
+            liquidtag = " LiquidSmooth/" + liquidversion.replaceAll("([0-9\\.]+?)-.*","$1");
+            final String liquiddevice = SystemProperties.get("ro.liquid.device");
+            if (liquiddevice != null && liquiddevice.length() > 0)
+                liquidtag = liquidtag.concat("/" + liquiddevice);
+        }
+
+        return String.format(base, buffer, mobile).concat(liquidtag);
     }
 
     /**

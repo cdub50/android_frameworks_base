@@ -2604,12 +2604,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     public void setKeyguardDisabledFeatures(ComponentName who, int which, int userHandle) {
         enforceCrossUserPermission(userHandle);
-
         synchronized (this) {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
             }
-
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES);
             if (ap.disabledKeyguardFeatures != which) {

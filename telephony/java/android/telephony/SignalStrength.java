@@ -22,7 +22,6 @@ import android.os.Parcelable;
 import android.os.SystemProperties;
 import android.telephony.Rlog;
 
-
 /**
  * Contains phone signal strength related information.
  */

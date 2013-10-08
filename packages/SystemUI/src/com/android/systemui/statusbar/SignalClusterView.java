@@ -348,4 +348,3 @@ public class SignalClusterView
                 Settings.System.ICON_COLOR_BEHAVIOR, 0) == 1;
     }
 }
-

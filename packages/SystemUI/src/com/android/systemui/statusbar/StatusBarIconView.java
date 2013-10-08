@@ -38,7 +38,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
 
 import com.android.internal.statusbar.StatusBarIcon;
 
@@ -340,4 +339,3 @@ public class StatusBarIconView extends AnimatedImageView {
         }
     }
 }
-

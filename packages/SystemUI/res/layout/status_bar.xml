@@ -146,7 +146,6 @@
                 android:paddingLeft="6dip"
                 android:visibility="gone"
                 android:gravity="center_vertical|left" />
-
         </LinearLayout>
     </LinearLayout>
 

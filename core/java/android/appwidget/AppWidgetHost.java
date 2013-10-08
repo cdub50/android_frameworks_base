@@ -430,5 +430,3 @@ public class AppWidgetHost {
         mViews.clear();
     }
 }
-
-

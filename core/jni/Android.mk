@@ -230,10 +230,6 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui
 endif
 
-ifeq ($(USE_OPENGL_RENDERER),true)
-	LOCAL_SHARED_LIBRARIES += libhwui
-endif
-
 LOCAL_SHARED_LIBRARIES += \
 	libdl
 # we need to access the private Bionic header

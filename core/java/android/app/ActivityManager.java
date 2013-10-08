@@ -47,7 +47,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -394,11 +393,7 @@ public class ActivityManager {
 		}
 
         if (totalSize >= (512*1024*1024)) {
-            if (SystemProperties.getBoolean("ro.nohardwaregfx", false)) {
-                return false;
-            } else {
-                return true;
-            }
+            return true;
         }
 
         if (pixels == 0) {

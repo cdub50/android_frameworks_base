@@ -93,7 +93,6 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private int MAX_WIDGETS;
     private boolean mUnlimitedWidgets;
-
     private AppWidgetHost mAppWidgetHost;
     private AppWidgetManager mAppWidgetManager;
     private KeyguardWidgetPager mAppWidgetContainer;

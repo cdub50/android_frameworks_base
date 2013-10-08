@@ -1816,6 +1816,28 @@ public final class Settings {
         public static final String ELECTRON_BEAM_ANIMATION_ON = "electron_beam_animation_on";
 
         /**
+         * The keyboard brightness to be used while the screen is on.
+         * Valid value range is between 0 and {@link PowerManager#getMaximumKeyboardBrightness()}
+         * @hide
+         */
+        public static final String KEYBOARD_BRIGHTNESS = "keyboard_brightness";
+
+        /**
+         * The button brightness to be used while the screen is on or after a button press,
+         * depending on the value of {@link BUTTON_BACKLIGHT_TIMEOUT}.
+         * Valid value range is between 0 and {@link PowerManager#getMaximumButtonBrightness()}
+         * @hide
+         */
+        public static final String BUTTON_BRIGHTNESS = "button_brightness";
+
+        /**
+         * The time in ms to keep the button backlight on after pressing a button.
+         * A value of 0 will keep the buttons on for as long as the screen is on.
+         * @hide
+         */
+        public static final String BUTTON_BACKLIGHT_TIMEOUT = "button_backlight_timeout";
+
+        /**
          * Whether to enable the electron beam animation when turning screen off
          *
          * @hide */
@@ -4031,7 +4053,6 @@ public final class Settings {
          */
         public static final String LOCK_VOLUME_KEYS = "lock_volume_keys";
 
-
         /**
          * Hide carrier information on notification drawer
          * @hide
@@ -4311,13 +4332,6 @@ public final class Settings {
          */
         public static final String STATUS_BAR_NOTIF_ICON_OPACITY = "status_bar_icon_opacity";
 
-        /**
-         * wake up when plugged or unplugged
-         *
-         * @hide
-         */
-        public static final String WAKEUP_WHEN_PLUGGED_UNPLUGGED = "wakeup_when_plugged_unplugged";
-
         /**  
          * Give MMS Notifications a breathing effect
          * @hide
@@ -4554,6 +4568,13 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
                 Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON;
+
+        /**
+         * wake up when plugged or unplugged
+         *
+         * @hide
+         */
+        public static final String WAKEUP_WHEN_PLUGGED_UNPLUGGED = "wakeup_when_plugged_unplugged";
 
         /**
          * @deprecated Use

@@ -243,7 +243,6 @@ public final class LockscreenTargetUtils {
                 Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas();
         canvas.setBitmap(bitmap);
-
         final int left = (size - width) / 2;
         final int top = (size - height) / 2;
 

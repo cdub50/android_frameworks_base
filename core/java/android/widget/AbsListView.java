@@ -62,13 +62,8 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
-import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -80,6 +75,14 @@ import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.NullPointerException;
+
+import android.view.animation.Animation;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.RotateAnimation;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
+import android.view.animation.AnimationUtils;
 
 /**
  * Base class that can be used to implement virtualized lists of items. A list does
@@ -1071,7 +1074,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public boolean performItemClick(View view, int position, long id) {
         boolean handled = false;
         boolean dispatchItemClick = true;
-
         if (mChoiceMode != CHOICE_MODE_NONE) {
             handled = true;
             boolean checkedStateChanged = false;
