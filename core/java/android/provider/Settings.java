@@ -2742,12 +2742,6 @@ public final class Settings {
          */
         public static final String PIE_SOFTKEYBOARD_IS_SHOWING = "pie_softkeyboard_is_showing";
 
-	/*
-         * AutoHide CombinedBar on tablets.
-         * @hide
-         */
-        public static final String COMBINED_BAR_AUTO_HIDE = "combined_bar_auto_hide";
-
         /**
          * Pie allow to adjust triggers if IME is showing (0 or 1)
          * @hide
