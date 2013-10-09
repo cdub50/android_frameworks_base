@@ -184,7 +184,7 @@ public class WifiP2pDnsSdServiceInfo extends WifiP2pServiceInfo {
          * |   Type (2)           | Version (1) |
          */
         if (dnsType == WifiP2pDnsSdServiceInfo.DNS_TYPE_TXT) {
-            dnsName = dnsName.toLowerCase(Locale.ROOT); // TODO: is this right?
+            dnsName = dnsName.toLowerCase(Locale.ROOT);
         }
         sb.append(compressDnsName(dnsName));
         sb.append(String.format("%04x", dnsType));
