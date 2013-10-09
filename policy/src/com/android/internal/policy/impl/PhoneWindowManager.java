@@ -348,8 +348,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mHasAppSwitchKey;
     boolean mHasCameraKey;
 
-    int mCurrentUser = 0;
-
     // The last window we were told about in focusChanged.
     WindowState mFocusedWindow;
     IApplicationToken mFocusedApp;
@@ -3416,7 +3414,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // For purposes of putting out fake window up to steal focus, we will
             // drive nav being hidden only by whether it is requested.
             boolean navVisible = (mLastSystemUiFlags&View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
-	    int navWidth = mNavigationBarWidthForRotation[displayRotation];
+	        int navWidth = mNavigationBarWidthForRotation[displayRotation];
 
             // When the navigation bar isn't visible, we put up a fake
             // input window to catch all touch events.  This way we can
@@ -5643,7 +5641,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         ResolveInfo info = mContext.getPackageManager().resolveActivityAsUser(
                 intent,
                 PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_META_DATA,
-                mCurrentUser);
+                UserHandle.USER_CURRENT);
         if (info != null) {
             ai = info.activityInfo;
         }
@@ -5886,7 +5884,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         setLastInputMethodWindowLw(null, null);
-        mCurrentUser = newUserId;
     }
 
     @Override
