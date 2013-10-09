@@ -100,11 +100,10 @@ import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.telephony.TelephonyManager;
 import android.content.ClipboardManager;
-import android.util.AndroidRuntimeException;
-import android.util.Log;
-import android.util.Slog;
+import android.util.*;
 import android.view.CompatibilityInfoHolder;
 import android.view.ContextThemeWrapper;
+import android.view.WindowManager;
 import android.view.Display;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityManager;
@@ -546,22 +545,22 @@ class ContextImpl extends Context {
             }});
 
         registerService(PROFILE_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    final Context outerContext = ctx.getOuterContext();
-                    return new ProfileManager (outerContext, ctx.mMainThread.getHandler());
-                }});
+            public Object createService(ContextImpl ctx) {
+                final Context outerContext = ctx.getOuterContext();
+                return new ProfileManager (outerContext, ctx.mMainThread.getHandler());
+            }});
 
         registerService(WimaxManagerConstants.WIMAX_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return WimaxHelper.createWimaxService(ctx, ctx.mMainThread.getHandler());
-                }});
+            public Object createService(ContextImpl ctx) {
+                return WimaxHelper.createWimaxService(ctx, ctx.mMainThread.getHandler());
+            }});
 
         registerService(IRDA_SERVICE, new StaticServiceFetcher() {
-                public Object createStaticService() {
-                    IBinder b = ServiceManager.getService(IRDA_SERVICE);
-                    IIrdaManager service = IIrdaManager.Stub.asInterface(b);
-                    return new IrdaManager(service);
-                }});
+            public Object createStaticService() {
+                IBinder b = ServiceManager.getService(IRDA_SERVICE);
+                IIrdaManager service = IIrdaManager.Stub.asInterface(b);
+                return new IrdaManager(service);
+            }});
     }
 
     static ContextImpl getImpl(Context context) {

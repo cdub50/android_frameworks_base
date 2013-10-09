@@ -62,7 +62,7 @@ public class TaskStackBuilder {
 
     private final ArrayList<Intent> mIntents = new ArrayList<Intent>();
     private final Context mSourceContext;
-    private boolean mFirstTaskOnHome = true; 
+    private boolean mFirstTaskOnHome = true;
 
     private TaskStackBuilder(Context a) {
         mSourceContext = a;
@@ -312,7 +312,7 @@ public class TaskStackBuilder {
             newIntent.addFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
         }
 
-        intents[0] = newIntent; 
+        intents[0] = newIntent;
         for (int i = 1; i < intents.length; i++) {
             intents[i] = new Intent(mIntents.get(i));
         }

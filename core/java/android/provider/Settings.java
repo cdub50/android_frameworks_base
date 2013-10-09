@@ -2754,13 +2754,13 @@ public final class Settings {
          */
         public static final String PIE_BUTTON_COLOR = "pie_button_color";
 
-	/**
+	    /**
          * HALO enabled, should default to 0 (HALO is disabled)
          * @hide
          */
         public static final String HALO_ENABLED = "halo_enabled";
 
- 	/**
+ 	    /**
          * HALO, should default to 0 (no, do not show)
          * @hide
          */
@@ -2776,22 +2776,22 @@ public final class Settings {
          * HALO hide?, should default to 0 (no, do not hide)
          * @hide
          */
-        public static final String HALO_HIDE = "halo_hide"; 
+        public static final String HALO_HIDE = "halo_hide";
 
-	/**
+	    /**
          * HALO size fraction, default is 1.0f (normal)
          * @hide
          */
         public static final String HALO_SIZE = "halo_size";
 
-	/**
+	    /**
          * HALO pause activities?, defaults to 0 (no, do not pause) on devices which isLargeRAM() == true
          * otherwise it defaults to 1 (yes, do pause)
          * @hide
          */
         public static final String HALO_PAUSE = "halo_pause";
 
-        /*
+        /**
          * HALO ninja?, should default to 0 (no, do not disappear when empty)
          * @hide
          */
@@ -2857,11 +2857,11 @@ public final class Settings {
          */
         public static final String HALO_CIRCLE_COLOR = "halo_circle_color";
 
-	/**
+	    /**
          * Do you want popups/floating windows?
          * @hide
          */
-        public static final String WE_WANT_POPUPS = "we_want_popups"; 
+        public static final String WE_WANT_POPUPS = "we_want_popups";
 
         /**
          * Pie button press color
@@ -3401,10 +3401,11 @@ public final class Settings {
         public static final String DISABLE_FULLSCREEN_KEYBOARD = "disable_fullscreen_keyboard";
 
         /**
-         * Whether Status bar should be hiidden when there are no notifications
+         * Whether Status bar should be hiidden when there are no
+         * notifications
          * @hide
          */
-        public static final String AUTO_HIDE_STATUSBAR = "status_bar_auto_hide";
+        public static final String AUTO_HIDE_STATUSBAR = "auto_hide_statusbar";
 
         /**
          * Whether Status Bar is currently hidden or not
@@ -3422,9 +3423,11 @@ public final class Settings {
 
         /**
          * Peek at stausbar when it is hidden by swiping down from top
+         * end of the screen
+         *
          * @hide
          */
-        public static final String STATUSBAR_PEEK = "status_bar_quick_peek";
+        public static final String STATUSBAR_PEEK = "statusbar_peek";
 
          /**
          * Whether Expanded desktop is currently running or not
@@ -4073,9 +4076,11 @@ public final class Settings {
         public static final String LOCKSCREEN_USE_WIDGET_CONTAINER_CAROUSEL = "lockscreen_use_widget_container_carousel";
 
         /**
+         * Whether music controls should be shown on the lockscreen if a supporting
+         * music player is active.
          * @hide
          */
-        public static final String LOCKSCREEN_GLOW_TORCH = "lockscreen_glow_torch";
+        public static final String LOCKSCREEN_MUSIC_CONTROLS = "lockscreen_music_controls";
 
         /**
          * Notifications Expand Behavior
@@ -4128,20 +4133,6 @@ public final class Settings {
          * @hide
          */
         public static final String LOCKSCREEN_SHORTCUTS_LONGPRESS = "lockscreen_shortcuts_longpress";
-
-        /**
-         * Whether music controls should be shown on the lockscreen if a supporting
-         * music player is active.
-         * @hide
-         */
-        public static final String LOCKSCREEN_MUSIC_CONTROLS = "lockscreen_music_controls";
-
-        /**
-         * Touch Key Light Duration
-         *
-         * @hide
-         */
-        public static final String TOUCHKEY_LIGHT_DUR = "touchkey_light_dir";
 
         /**
          * Ability to enable/disable Daul pane prefs.
@@ -4427,7 +4418,7 @@ public final class Settings {
          *
          * @hide
          */
-        public static final String ICON_COLOR_BEHAVIOR = "status_icon_color_behavior";
+        public static final String ICON_COLOR_BEHAVIOR = "icon_color_behavior";
 
         /**
          * Show the pending notification counts as overlays on the status bar
@@ -4441,17 +4432,27 @@ public final class Settings {
          */
         public static final String STATUS_BAR_NOTIF_ICON_OPACITY = "status_bar_icon_opacity";
 
-        /**  
+        /**
          * Give MMS Notifications a breathing effect
          * @hide
          */
         public static final String MMS_BREATH = "mms_breath";
 
-        /**  
+        /**
          * Give MMS Notifications a breathing effect
          * @hide
          */
         public static final String MISSED_CALL_BREATH = "missed_call_breath";
+
+        /**
+         * @hide
+         */
+        public static final String LOCKSCREEN_CUSTOM_TEXT_COLOR = "lockscreen_custom_text_color";
+
+        /**
+         * @hide
+         */
+        public static final String LOCKSCREEN_GLOW_TORCH = "lockscreen_glow_torch";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

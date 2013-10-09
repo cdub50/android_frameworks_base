@@ -59,7 +59,7 @@ import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;  
+import android.util.TypedValue;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.ActionMode;
@@ -67,7 +67,7 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
-import android.view.Gravity; 
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -1488,9 +1488,9 @@ public class Activity extends ContextThemeWrapper
         if (mWindow != null) {
             // Pass the configuration changed event to the window
             mWindow.onConfigurationChanged(newConfig);
-	if (mWindow.mIsFloatingWindow) {
+            if (mWindow.mIsFloatingWindow) {
                 scaleFloatingWindow(null);
-            }   
+            }
         }
 
         if (mActionBar != null) {
@@ -2481,7 +2481,6 @@ public class Activity extends ContextThemeWrapper
                 mQuickPeekAction = false;
                 break;
         }
-
         if (getWindow().superDispatchTouchEvent(ev)) {
             return true;
         }
@@ -5169,9 +5168,9 @@ public class Activity extends ContextThemeWrapper
         mFragments.attachActivity(this, mContainer, null);
 
         boolean floating = (intent.getFlags()&Intent.FLAG_FLOATING_WINDOW) == Intent.FLAG_FLOATING_WINDOW;
-	boolean mWeWantPopups = (Settings.System.getInt(getContentResolver(), Settings.System.WE_WANT_POPUPS, 1) == 1);
+	    boolean mWeWantPopups = (Settings.System.getInt(getContentResolver(), Settings.System.WE_WANT_POPUPS, 1) == 1);
         boolean history = (intent.getFlags()&Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY;
-        if ((intent != null) && floating && mWeWantPopups) {
+        if ((intent != null) && floating && mWeWantPopups && !history) {
             TypedArray styleArray = context.obtainStyledAttributes(info.theme, com.android.internal.R.styleable.Window);
             TypedValue backgroundValue = styleArray.peekValue(com.android.internal.R.styleable.Window_windowBackground);
 
@@ -5206,7 +5205,7 @@ public class Activity extends ContextThemeWrapper
             scaleFloatingWindow(context);
         } else {
             mWindow = PolicyManager.makeNewWindow(this);
-        } 
+        }
 
         mWindow.setCallback(this);
         mWindow.getLayoutInflater().setPrivateFactory(this);
@@ -5260,7 +5259,7 @@ public class Activity extends ContextThemeWrapper
         } else {
             mWindow.setLayout((int)(metrics.widthPixels * 0.7f), (int)(metrics.heightPixels * 0.8f));
         }
-    } 
+    }
 
     /** @hide */
     public final IBinder getActivityToken() {
