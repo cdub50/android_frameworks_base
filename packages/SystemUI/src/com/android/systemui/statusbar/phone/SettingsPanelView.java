@@ -131,4 +131,15 @@ public class SettingsPanelView extends PanelView {
         mHandleBar.draw(canvas);
         canvas.translate(0, -off);
     }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (DEBUG_GESTURES) {
+            if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
+                EventLog.writeEvent(EventLogTags.SYSUI_QUICKPANEL_TOUCH,
+                       event.getActionMasked(), (int) event.getX(), (int) event.getY());
+            }
+        }
+        return super.onTouchEvent(event);
+    }
 }

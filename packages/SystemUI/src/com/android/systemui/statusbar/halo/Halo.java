@@ -76,7 +76,6 @@ import android.view.animation.OvershootInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.TranslateAnimation;
 import android.animation.TimeInterpolator;
-import android.util.TypedValue;
 import android.view.Display;
 import android.view.View;
 import android.view.Gravity;
@@ -101,6 +100,7 @@ import android.widget.ScrollView;
 import android.widget.ImageButton;
 
 import com.android.systemui.R;
+import com.android.internal.util.liquid.ScreenTypeUtils;
 import com.android.systemui.statusbar.BaseStatusBar.NotificationClicker;
 import android.service.notification.StatusBarNotification;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -108,9 +108,10 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.phone.Ticker;
+import com.android.systemui.statusbar.tablet.TabletTicker;
 import com.android.systemui.statusbar.policy.HaloPolicy;
 
-public class Halo extends FrameLayout implements Ticker.TickerCallback {
+public class Halo extends FrameLayout implements Ticker.TickerCallback, TabletTicker.TabletTickerCallback {
 
     public static final String TAG = "HaloLauncher";
 
@@ -322,9 +323,12 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback {
                Settings.System.HALO_EFFECT_COLOR, 0xFF33B5E5);
 
         mPaintHolo.setAntiAlias(true);
-        mPaintHolo.setColor(color);
-        mPaintHoloBlue.setAntiAlias(true);
-        mPaintHoloBlue.setColor(mContext.getResources().getColor(R.color.halo_ping_color));
+        if (mEnableColor) {
+            mPaintHolo.setColor(color);
+        } else {
+            mPaintHolo.setColor(mContext.getResources().getColor(R.color.halo_ping_color));
+        }
+
         mPaintWhite.setAntiAlias(true);
         mPaintWhite.setColor(0xfff0f0f0);
         mPaintHoloRed.setAntiAlias(true);
@@ -495,7 +499,11 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback {
         } catch (android.os.RemoteException ex) {
             // failed to register listener
         }
-        if (mBar.getTicker() != null) mBar.getTicker().setUpdateEvent(this);
+        if(ScreenTypeUtils.isTablet(mContext)) {
+            if (mBar.getTabletTicker() != null) mBar.getTabletTicker().setUpdateEvent(this);
+        } else {
+            if (mBar.getTicker() != null) mBar.getTicker().setUpdateEvent(this);
+        }
         mNotificationData = mBar.getNotificationData();
         loadLastNotification(true);
     }
@@ -923,7 +931,11 @@ public class Halo extends FrameLayout implements Ticker.TickerCallback {
         mEffect.unscheduleSleep();
         mHandler.removeCallbacksAndMessages(null);
         // Kill callback
-        mBar.getTicker().setUpdateEvent(null);
+        if(ScreenTypeUtils.isTablet(mContext)) {
+            if (mBar.getTabletTicker() != null) mBar.getTabletTicker().setUpdateEvent(this);
+        } else {
+            if (mBar.getTicker() != null) mBar.getTicker().setUpdateEvent(this);
+        }
         // Flag tasker
         mBar.setHaloTaskerActive(false, false);
         // Kill the effect layer

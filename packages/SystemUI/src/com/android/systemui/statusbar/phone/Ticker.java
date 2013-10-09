@@ -51,14 +51,14 @@ public abstract class Ticker {
     private float mIconScale;
     private TickerCallback mEvent;
 
-    public interface TickerCallback  
-    {  
+    public interface TickerCallback
+    {
         public void updateTicker(StatusBarNotification notification, String text);
-    }  
+    }
 
     public void setUpdateEvent(TickerCallback event) {
         mEvent = event;
-    } 
+    }
 
     public static boolean isGraphicOrEmoji(char c) {
         int gc = Character.getType(c);
@@ -76,7 +76,7 @@ public abstract class Ticker {
         public CharSequence text;
         public int current;
         public int next;
-        public boolean first; 
+        public boolean first;
 
         public StaticLayout getLayout(CharSequence substr) {
             int w = mTextSwitcher.getWidth() - mTextSwitcher.getPaddingLeft()
@@ -224,25 +224,24 @@ public abstract class Ticker {
         }
 
         mSegments.add(newSegment);
-
-	if (mEvent != null) {
+	    if (mEvent != null) {
             if (newSegment != null) {
                 mEvent.updateTicker(newSegment.notification, text.toString());
             }
-        } 
+        }
 
         if (initialCount == 0 && mSegments.size() > 0) {
             Segment seg = mSegments.get(0);
             seg.first = false;
-            
+
             mIconSwitcher.setAnimateFirstView(false);
             mIconSwitcher.reset();
             mIconSwitcher.setImageDrawable(seg.icon);
-            
+
             mTextSwitcher.setAnimateFirstView(false);
             mTextSwitcher.reset();
             mTextSwitcher.setText(seg.getText());
-            
+
             tickerStarting();
             scheduleAdvance();
         }

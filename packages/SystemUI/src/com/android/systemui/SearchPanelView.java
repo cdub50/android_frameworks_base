@@ -41,7 +41,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.Vibrator;
@@ -94,7 +93,7 @@ public class SearchPanelView extends FrameLayout implements
     private final Context mContext;
     private BaseStatusBar mBar;
     private StatusBarTouchProxy mStatusBarTouchProxy;
-    private SettingsObserver mSettingsObserver;
+    private SettingsObserver mObserver;
 
     private boolean mShowing;
     private View mSearchTargetsContainer;
@@ -129,62 +128,7 @@ public class SearchPanelView extends FrameLayout implements
         mResources = mContext.getResources();
 
         mContentResolver = mContext.getContentResolver();
-        mSettingsObserver = new SettingsObserver(new Handler());
-        updateSettings();
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mSettingsObserver.observe();
-        updateSettings();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        mContentResolver.unregisterContentObserver(mSettingsObserver);
-        super.onDetachedFromWindow();
-    }
-
-    private void startAssistActivity() {
-        if (!mBar.isDeviceProvisioned()) return;
-
-        maybeSkipKeyguard();
-        // Close Recent Apps if needed
-        mBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL);
-        boolean isKeyguardShowing = false;
-        try {
-            isKeyguardShowing = mWm.isKeyguardLocked();
-        } catch (RemoteException e) {
-
-        }
-
-        if (isKeyguardShowing) {
-            // Have keyguard show the bouncer and launch the activity if the user succeeds.
-            try {
-                mWm.showAssistant();
-            } catch (RemoteException e) {
-                // too bad, so sad...
-            }
-            onAnimationStarted();
-        } else {
-            // Otherwise, keyguard isn't showing so launch it from here.
-            Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                    .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
-            if (intent == null) return;
-
-            try {
-                ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
-                        R.anim.search_launch_enter, R.anim.search_launch_exit,
-                        getHandler(), this);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivityAsUser(intent, opts.toBundle(),
-                        new UserHandle(UserHandle.USER_CURRENT));
-            } catch (ActivityNotFoundException e) {
-                Slog.w(TAG, "Activity not found for " + intent.getAction());
-                onAnimationStarted();
-            }
-        }
+        mObserver = new SettingsObserver(new Handler());
     }
 
     private class H extends Handler {
@@ -283,15 +227,6 @@ public class SearchPanelView extends FrameLayout implements
         // TODO: fetch views
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mGlowPadViewListener);
-
-        updateSettings();
-        setDrawables();
-    }
-
-    private void maybeSkipKeyguard() {
-        Intent u = new Intent();
-        u.setAction("com.android.lockscreen.ACTION_UNLOCK_RECEIVER");
-        mContext.sendBroadcastAsUser(u, UserHandle.ALL);
     }
 
     private void setDrawables() {

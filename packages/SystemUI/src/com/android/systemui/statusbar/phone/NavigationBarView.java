@@ -536,8 +536,6 @@ public class NavigationBarView extends LinearLayout implements BaseStatusBar.Nav
                     (0 != (hints & StatusBarManager.NAVIGATION_HINT_RECENT_NOP)) ? 0.5f : 1.0f);
         }
 
-        ((ImageView)getRecentsButton()).setImageDrawable(mVertical ? mRecentLandIcon : mRecentIcon);
-
         setDisabledFlags(mDisabledFlags, true);
     }
 

@@ -29,6 +29,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.Slog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -57,7 +58,7 @@ public class TabletTicker
 
     private static final int MSG_ADVANCE = 1;
 
-    private static final int ADVANCE_DELAY = 5000; // 5 seconds
+    private int ADVANCE_DELAY = 3500; // 3.5 seconds
 
     private final Context mContext;
     private final WindowManager mWindowManager;
@@ -78,6 +79,18 @@ public class TabletTicker
     private LayoutTransition mLayoutTransition;
     private boolean mWindowShouldClose;
 
+    private TabletTickerCallback mEvent;
+
+    public interface TabletTickerCallback  
+    {  
+        public void updateTicker(StatusBarNotification notification);
+        public void updateTicker(StatusBarNotification notification, String text);
+    }  
+
+    public void setUpdateEvent(TabletTickerCallback event) {
+        mEvent = event;
+    }
+
     public TabletTicker(TabletStatusBar bar) {
         mBar = bar;
         mContext = bar.getContext();
@@ -93,7 +106,12 @@ public class TabletTicker
                     + " mQueuePos=" + mQueuePos + " mQueue=" + Arrays.toString(mQueue));
         }
 
-	// If it's already in here, remove whatever's in there and put the new one at the end.
+        if (isDisabled() && notification.getNotification().tickerText != null) {
+            mEvent.updateTicker(notification, notification.getNotification().tickerText.toString());
+            //return;
+        }
+
+        // If it's already in here, remove whatever's in there and put the new one at the end.
         remove(key, false);
 
         mKeys[mQueuePos] = key;
@@ -114,7 +132,7 @@ public class TabletTicker
     }
 
     public void remove(IBinder key, boolean advance) {
-	if (mCurrentKey == key) {
+        if (mCurrentKey == key) {
             // Showing now
             if (advance) {
                 removeMessages(MSG_ADVANCE);
@@ -140,7 +158,7 @@ public class TabletTicker
     }
 
     public void halt() {
-	removeMessages(MSG_ADVANCE);
+        removeMessages(MSG_ADVANCE);
         if (mCurrentView != null || mQueuePos != 0) {
             for (int i=0; i<QUEUE_LENGTH; i++) {
                 mKeys[i] = null;
@@ -159,11 +177,19 @@ public class TabletTicker
         }
     }
 
+    private boolean isDisabled() {
+        return Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.HALO_ACTIVE, 0) == 1;
+    }
+
     private void advance() {
-	// Out with the old...
+        // Out with the old...
         if (mCurrentView != null) {
             if (mWindow != null) {
                 mWindow.removeView(mCurrentView);
+                mWindowManager.removeView(mWindow);
+                mWindow = null;
+                mBar.doneTicking();
             }
             mCurrentView = null;
             mCurrentKey = null;
@@ -178,6 +204,12 @@ public class TabletTicker
                 if (mWindow == null) {
                     mWindow = makeWindow();
                     mWindowManager.addView(mWindow, mWindow.getLayoutParams());
+                }
+
+                if (isDisabled()) {
+                  ADVANCE_DELAY = 0;
+                } else {
+                  ADVANCE_DELAY = 3500;
                 }
 
                 mWindow.addView(mCurrentView);

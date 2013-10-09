@@ -16,13 +16,14 @@
 
 package com.android.systemui.statusbar;
 
+import android.app.Notification;
+import android.graphics.Bitmap;
 import android.service.notification.StatusBarNotification;
-import android.graphics.Bitmap; 
 import android.os.IBinder;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.android.systemui.statusbar.BaseStatusBar.NotificationClicker; 
+import com.android.systemui.statusbar.BaseStatusBar.NotificationClicker;
 import com.android.systemui.R;
 
 import java.util.Comparator;
@@ -41,10 +42,10 @@ public class NotificationData {
         public View expanded; // the inflated RemoteViews
         public View haloContent;
         public ImageView largeIcon;
-	protected boolean hide = false;
+        protected boolean hide = false;
         protected Bitmap roundIcon;
         protected View expandedLarge;
-	protected NotificationClicker floatingIntent; 
+        protected NotificationClicker floatingIntent;
         public Entry() {}
         public Entry(IBinder key, StatusBarNotification n, StatusBarIconView ic) {
             this.key = key;
@@ -58,12 +59,12 @@ public class NotificationData {
         public View getLargeView() {
             return expandedLarge;
         }
-	public NotificationClicker getFloatingIntent() {
+        public NotificationClicker getFloatingIntent() {
             return floatingIntent;
         }
         public Bitmap getRoundIcon() {
             return roundIcon;
-        } 
+        }
         /**
          * Return whether the entry can be expanded.
          */
