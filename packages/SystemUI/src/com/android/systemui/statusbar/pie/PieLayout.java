@@ -62,9 +62,9 @@ public class PieLayout extends FrameLayout implements View.OnTouchListener {
 
     // default value, must fit with PieStyleSettings.java in settings
     public static final float PIE_CONTROL_SIZE_DEFAULT = 0.84f;
-    // default icon scale value on default control size
-    // need to be >= PIE_CONTROL_SIZE_DEFAULT
-    public static final float PIE_ICON_SIZE_FACTOR_DEFAULT = 1.0f;
+    // default icon start factor when icon should start to resize
+    // related to PIE_SIZE value
+    public static final float PIE_ICON_START_SIZE_FACTOR = 1.0f;
 
     private TransparencyManager mTransparencyManager;
 

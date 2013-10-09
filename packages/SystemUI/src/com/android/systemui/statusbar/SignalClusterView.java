@@ -58,7 +58,6 @@ public class SignalClusterView
     private boolean mEtherVisible = false;
     private int mEtherIconId = 0;
     private String mWifiDescription, mMobileDescription, mMobileTypeDescription, mEtherDescription;
-
     private boolean customColor;
     private int color = 0;
 
@@ -223,7 +222,6 @@ public class SignalClusterView
         if (mAirplane != null) {
             mAirplane.setImageDrawable(null);
         }
-
         apply();
     }
 
@@ -264,7 +262,6 @@ public class SignalClusterView
                 }
                 mMobile.setImageDrawable(mobileBitmap);
             }
-
             mMobile.setImageResource(mMobileStrengthId);
             mMobileActivity.setImageResource(mMobileActivityId);
             mMobileType.setImageResource(mMobileTypeId);
@@ -286,7 +283,6 @@ public class SignalClusterView
                 }
                 mAirplane.setImageDrawable(AirplaneBitmap);
             }
-
             mAirplane.setImageResource(mAirplaneIconId);
             mAirplane.setVisibility(View.VISIBLE);
         } else {
@@ -323,15 +319,15 @@ public class SignalClusterView
 
         mMobileType.setVisibility(
                 !mWifiVisible ? View.VISIBLE : View.GONE);
-
         updateSettings();
     }
 
     private void updateSignalClusterStyle() {
         if (!mIsAirplaneMode) {
-            if (mMobileGroup != null)
+            if (mMobileGroup != null) {
                 mMobileGroup.setVisibility(mSignalClusterStyle !=
                         SIGNAL_CLUSTER_STYLE_NORMAL ? View.GONE : View.VISIBLE);
+            }
         }
     }
 
