@@ -6491,7 +6491,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mDisplayManagerService.setDisplayInfoOverrideFromWindowManager(
                     displayContent.getDisplayId(), displayInfo);
         }
-
         if (false) {
             Slog.i(TAG, "Set app display size: " + m.appWidth + " x " + m.appHeight);
         }
@@ -6500,27 +6499,64 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean computeScreenConfigurationLocked(Configuration config) {
-        // TODO(multidisplay): For now, apply Configuration to main screen only.
-        final DisplayContent displayContent = getDefaultDisplayContentLocked();
-
-        // Update application display metrics.
-        final ApplicationDisplayMetrics appDm = updateApplicationDisplayMetricsLocked(
-                displayContent);
-
-        if (appDm == null) {
+        if (!mDisplayReady) {
             return false;
         }
 
-        final boolean rotated = appDm.rotated;
-        final int dw = appDm.dw;
-        final int dh = appDm.dh;
+        // TODO(multidisplay): For now, apply Configuration to main screen only.
+        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+
+        // Use the effective "visual" dimensions based on current rotation
+        final boolean rotated = (mRotation == Surface.ROTATION_90
+                || mRotation == Surface.ROTATION_270);
+        final int realdw = rotated ?
+                displayContent.mBaseDisplayHeight : displayContent.mBaseDisplayWidth;
+        final int realdh = rotated ?
+                displayContent.mBaseDisplayWidth : displayContent.mBaseDisplayHeight;
+        int dw = realdw;
+        int dh = realdh;
+
+        if (mAltOrientation) {
+            if (realdw > realdh) {
+                // Turn landscape into portrait.
+                int maxw = (int)(realdh/1.3f);
+                if (maxw < realdw) {
+                    dw = maxw;
+                }
+            } else {
+                // Turn portrait into landscape.
+                int maxh = (int)(realdw/1.3f);
+                if (maxh < realdh) {
+                    dh = maxh;
+                }
+            }
+        }
 
         if (config != null) {
             config.orientation = (dw <= dh) ? Configuration.ORIENTATION_PORTRAIT :
                     Configuration.ORIENTATION_LANDSCAPE;
         }
 
+        // Update application display metrics.
+        final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
+        final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        synchronized(displayContent.mDisplaySizeLock) {
+            displayInfo.rotation = mRotation;
+            displayInfo.logicalWidth = dw;
+            displayInfo.logicalHeight = dh;
+            displayInfo.logicalDensityDpi = displayContent.mBaseDisplayDensity;
+            displayInfo.appWidth = appWidth;
+            displayInfo.appHeight = appHeight;
+            displayInfo.getLogicalMetrics(mRealDisplayMetrics, null);
+            displayInfo.getAppMetrics(mDisplayMetrics, null);
+            mDisplayManagerService.setDisplayInfoOverrideFromWindowManager(
+                    displayContent.getDisplayId(), displayInfo);
+        }
+        if (false) {
+            Slog.i(TAG, "Set app display size: " + appWidth + " x " + appHeight);
+        }
+
         final DisplayMetrics dm = mDisplayMetrics;
         mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(dm,
                 mCompatDisplayMetrics);
