@@ -100,10 +100,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.Calendar;
-import java.util.Map;
 
 import libcore.io.IoUtils;
 
@@ -217,19 +216,19 @@ public class NotificationManagerService extends INotificationManager.Stub
     private HashSet<String> mEnabledListenerPackageNames = new HashSet<String>();
 
     // Notification control database. For now just contains disabled packages.
-    private AtomicFile mPolicyFile, mHaloPolicyFile; 
+    private AtomicFile mPolicyFile, mHaloPolicyFile;
     private HashSet<String> mBlockedPackages = new HashSet<String>();
     private HashSet<String> mHaloBlacklist = new HashSet<String>();
     private HashSet<String> mHaloWhitelist = new HashSet<String>();
-    private boolean mHaloPolicyisBlack = true; 
+    private boolean mHaloPolicyisBlack = true;
 
     private static final int DB_VERSION = 1;
 
     private static final String TAG_BODY = "notification-policy";
     private static final String ATTR_VERSION = "version";
-    private static final String ATTR_HALO_POLICY_IS_BLACK = "policy_is_black"; 
+    private static final String ATTR_HALO_POLICY_IS_BLACK = "policy_is_black";
 
-    private static final String TAG_ALLOWED_PKGS = "allowed-packages"; 
+    private static final String TAG_ALLOWED_PKGS = "allowed-packages";
     private static final String TAG_BLOCKED_PKGS = "blocked-packages";
     private static final String TAG_PACKAGE = "package";
     private static final String ATTR_NAME = "name";
@@ -409,10 +408,6 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     Archive mArchive = new Archive();
 
-    private int readPolicy(AtomicFile file, String lookUpTag, HashSet<String> db) {
-        return readPolicy(file, lookUpTag, db, null, 0);
-    } 
-
     private int readPolicy(AtomicFile file, String lookUpTag, HashSet<String> db, String resultTag, int defaultResult) {
         int result = defaultResult;
         FileInputStream infile = null;
@@ -439,12 +434,12 @@ public class NotificationManagerService extends INotificationManager.Stub
                             if (TAG_PACKAGE.equals(tag)) {
                                 db.add(parser.getAttributeValue(null, ATTR_NAME));
                             } else if (lookUpTag.equals(tag) && type == END_TAG) {
-                                break; 
+                                break;
                             }
                         }
                     }
-		}
-	    }
+                }
+            }
         } catch (Exception e) {
             // Unable to read
         } finally {
@@ -458,8 +453,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             if (mPolicyFile == null) {
                 mPolicyFile = new AtomicFile(new File("/data/system", "notification_policy.xml"));
                 mBlockedPackages.clear();
-                readPolicy(mPolicyFile, TAG_BLOCKED_PKGS, mBlockedPackages);
-
+                readPolicy(mPolicyFile, TAG_BLOCKED_PKGS, mBlockedPackages, null, 0);
             }
         }
     }
@@ -470,9 +464,43 @@ public class NotificationManagerService extends INotificationManager.Stub
             mHaloBlacklist.clear();
             mHaloPolicyisBlack = readPolicy(mHaloPolicyFile, TAG_BLOCKED_PKGS, mHaloBlacklist, ATTR_HALO_POLICY_IS_BLACK, 1) == 1;
             mHaloWhitelist.clear();
-            readPolicy(mHaloPolicyFile, TAG_ALLOWED_PKGS, mHaloWhitelist);
+            readPolicy(mHaloPolicyFile, TAG_ALLOWED_PKGS, mHaloWhitelist, null, 0);
         }
-    } 
+    }
+
+    private void writeBlockDb() {
+        synchronized(mBlockedPackages) {
+            FileOutputStream outfile = null;
+            try {
+                outfile = mPolicyFile.startWrite();
+
+                XmlSerializer out = new FastXmlSerializer();
+                out.setOutput(outfile, "utf-8");
+
+                out.startDocument(null, true);
+
+                out.startTag(null, TAG_BODY); {
+                    out.attribute(null, ATTR_VERSION, String.valueOf(DB_VERSION));
+                    out.startTag(null, TAG_BLOCKED_PKGS); {
+                        // write all known network policies
+                        for (String pkg : mBlockedPackages) {
+                            out.startTag(null, TAG_PACKAGE); {
+                                out.attribute(null, ATTR_NAME, pkg);
+                            } out.endTag(null, TAG_PACKAGE);
+                        }
+                    } out.endTag(null, TAG_BLOCKED_PKGS);
+                } out.endTag(null, TAG_BODY);
+
+                out.endDocument();
+
+                mPolicyFile.finishWrite(outfile);
+            } catch (IOException e) {
+                if (outfile != null) {
+                    mPolicyFile.failWrite(outfile);
+                }
+            }
+        }
+    }
 
     private synchronized void writeHaloBlockDb() {
         FileOutputStream outfile = null;
@@ -531,7 +559,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     public void setHaloBlacklistStatus(String pkg, boolean status) {
         if (status) {
-            mHaloBlacklist.add(pkg);            
+            mHaloBlacklist.add(pkg);
         } else {
             mHaloBlacklist.remove(pkg);
         }
@@ -540,7 +568,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     public void setHaloWhitelistStatus(String pkg, boolean status) {
         if (status) {
-            mHaloWhitelist.add(pkg);            
+            mHaloWhitelist.add(pkg);
         } else {
             mHaloWhitelist.remove(pkg);
         }
@@ -557,7 +585,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         } else {
             return mHaloWhitelist.contains(pkg);
         }
-    } 
+    }
 
     /**
      * Use this when you just want to know if notifications are OK for this package.
@@ -792,7 +820,6 @@ public class NotificationManagerService extends INotificationManager.Stub
     @Override
     public void registerListener(final INotificationListener listener,
             final ComponentName component, final int userid) {
-
         if (!component.getPackageName().equals("HaloComponent")) checkCallerIsSystem();
 
         synchronized (mNotificationList) {
@@ -1279,7 +1306,9 @@ public class NotificationManagerService extends INotificationManager.Stub
             boolean queryRemove = false;
             boolean packageChanged = false;
             boolean cancelNotifications = true;
-            if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
+
+            if (action.equals(Intent.ACTION_PACKAGE_ADDED)
+                    || (queryRemove=action.equals(Intent.ACTION_PACKAGE_REMOVED))
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
                     || (packageChanged=action.equals(Intent.ACTION_PACKAGE_CHANGED))
                     || (queryRestart=action.equals(Intent.ACTION_QUERY_PACKAGE_RESTART))
@@ -1514,10 +1543,12 @@ public class NotificationManagerService extends INotificationManager.Stub
         mToastQueue = new ArrayList<ToastRecord>();
         mHandler = new WorkerHandler();
 
+        loadBlockDb();
+        loadHaloBlockDb();
+
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
 
         importOldBlockDb();
-	loadHaloBlockDb();
 
         mStatusBar = statusBar;
         statusBar.setNotificationCallbacks(mNotificationCallbacks);
@@ -2115,7 +2146,6 @@ public class NotificationManagerService extends INotificationManager.Stub
                 // The DEFAULT_VIBRATE flag trumps any custom vibration AND the fallback.
                 final boolean useDefaultVibrate =
                         (notification.defaults & Notification.DEFAULT_VIBRATE) != 0;
-
                 if (!(inQuietHours && mQuietHoursStill)
                         && (useDefaultVibrate || convertSoundToVibration || hasCustomVibrate)
                         && !(audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT)) {
@@ -2484,15 +2514,13 @@ public class NotificationManagerService extends INotificationManager.Stub
             // use most recent light with highest score
             for (int i = mLights.size(); i > 0; i--) {
                 NotificationRecord r = mLights.get(i - 1);
-                if (mLedNotification == null
-                        || r.sbn.getScore() > mLedNotification.sbn.getScore()) {
+                if (mLedNotification == null || r.sbn.getScore() > mLedNotification.sbn.getScore()) {
                     mLedNotification = r;
                 }
             }
         }
 
-        // Don't flash while we are in a call, screen is on or we are
-        // in quiet hours with light dimmed
+        // Don't flash while we are in a call, screen is on or we are in quiet hours with light dimmed
         if (mLedNotification == null || mInCall
                 || (mScreenOn && !mDreaming) || (inQuietHours() && mQuietHoursDim)) {
             mNotificationLight.turnOff();
@@ -2516,7 +2544,6 @@ public class NotificationManagerService extends INotificationManager.Stub
                 ledOnMS = ledno.ledOnMS;
                 ledOffMS = ledno.ledOffMS;
             }
-
             // pulse repeatedly
             mNotificationLight.setFlashing(ledARGB, LightsService.LIGHT_FLASH_TIMED,
                     ledOnMS, ledOffMS);
@@ -2537,8 +2564,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             String packageName = packageValues[0];
             String[] values = packageValues[1].split(";");
             if (values.length != 3) {
-                Log.e(TAG, "Error parsing custom led values '"
-                        + packageValues[1] + "' for " + packageName);
+                Log.e(TAG, "Error parsing custom led values '" + packageValues[1] + "' for " + packageName);
                 continue;
             }
             NotificationLedValues ledValues = new NotificationLedValues();
@@ -2547,8 +2573,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 ledValues.onMS = Integer.parseInt(values[1]);
                 ledValues.offMS = Integer.parseInt(values[2]);
             } catch (Exception e) {
-                Log.e(TAG, "Error parsing custom led values '"
-                        + packageValues[1] + "' for " + packageName);
+                Log.e(TAG, "Error parsing custom led values '" + packageValues[1] + "' for " + packageName);
                 continue;
             }
             mNotificationPulseCustomLedValues.put(packageName, ledValues);
@@ -2672,7 +2697,6 @@ public class NotificationManagerService extends INotificationManager.Stub
                     break;
                 }
             }
-
         }
     }
 }
