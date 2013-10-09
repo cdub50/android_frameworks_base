@@ -26,6 +26,7 @@ import com.android.internal.R;
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.KeyguardManager;
 import android.app.Profile;
 import android.app.ProfileManager;
 import android.content.BroadcastReceiver;
@@ -440,12 +441,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         // next: profiles
         // only shown if both system profiles and the menu item is enabled, enabled by default
-        boolean showProfiles =
-                Settings.System.getIntForUser(cr,
-                        Settings.System.SYSTEM_PROFILES_ENABLED, 1, UserHandle.USER_CURRENT) == 1
-                && Settings.System.getIntForUser(cr,
-                        Settings.System.POWER_MENU_PROFILES_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
-        if (showProfiles) {
+        final int mProfile = Settings.System.getIntForUser(cr, 
+                Settings.System.POWER_MENU_PROFILES_ENABLED, 1, UserHandle.USER_CURRENT);
+        final KeyguardManager km = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        if ((Settings.System.getIntForUser(cr,
+                Settings.System.SYSTEM_PROFILES_ENABLED, 1,
+                UserHandle.USER_CURRENT) == 1) && (mProfile != 0)) {
             mItems.add(
                 new ProfileChooseAction() {
                     public void onPress() {
@@ -457,7 +458,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     }
 
                     public boolean showDuringKeyguard() {
-                        return false;
+                        if (mProfile == 2 && !km.isKeyguardSecure()) {
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
 
                     public boolean showBeforeProvisioning() {
@@ -548,9 +553,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                         return mAdapter.getItem(position).onLongPress();
                     }
         });
-
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-
         dialog.setOnDismissListener(this);
 
         return dialog;
@@ -683,13 +686,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                         msg.replyTo = new Messenger(h);
                         msg.arg1 = msg.arg2 = 0;
 
-                        /*  remove for the time being
-                        if (mStatusBar != null && mStatusBar.isVisibleLw())
-                            msg.arg1 = 1;
-                        if (mNavigationBar != null && mNavigationBar.isVisibleLw())
-                            msg.arg2 = 1;
-                         */
-
                         /* wait for the dialog box to close */
                         try {
                             Thread.sleep(1000);
@@ -706,7 +702,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 @Override
                 public void onServiceDisconnected(ComponentName name) {}
             };
-
             if (mContext.bindServiceAsUser(intent, conn, Context.BIND_AUTO_CREATE, UserHandle.CURRENT)) {
                 mScreenshotConnection = conn;
                 mHandler.postDelayed(mScreenshotTimeout, 10000);
@@ -719,9 +714,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mAirplaneModeOn.updateState(mAirplaneState);
         mAdapter.notifyDataSetChanged();
         mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-
         mDialog.setTitle(R.string.global_actions);
-
         if (mShowSilentToggle) {
             IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
             mContext.registerReceiver(mRingerModeReceiver, filter);

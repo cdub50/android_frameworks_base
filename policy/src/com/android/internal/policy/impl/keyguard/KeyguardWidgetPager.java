@@ -615,7 +615,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         animateOutlinesAndSidePages(false);
     }
 
-    public void showInitialPageHints() { 
+    public void showInitialPageHints() {
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             KeyguardWidgetFrame child = getWidgetPageAt(i);
@@ -624,7 +624,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
                         Settings.System.LOCKSCREEN_HIDE_INITIAL_PAGE_HINTS, 1) == 0) {
                     child.fadeFrame(this, true, KeyguardWidgetFrame.OUTLINE_ALPHA_MULTIPLIER,
                             CHILDREN_OUTLINE_FADE_IN_DURATION);
-                } 
+                }
                 child.setContentAlpha(0f);
             } else {
                 child.setBackgroundAlpha(0f);

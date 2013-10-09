@@ -119,8 +119,8 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                 switch (resId) {
                 case com.android.internal.R.drawable.ic_action_assist_generic:
                     Intent assistIntent =
-                    ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                    .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
+                            ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                            .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
                     if (assistIntent != null) {
                         mActivityLauncher.launchActivity(assistIntent, false, true, null, null);
                     } else {
@@ -235,15 +235,9 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         }
 
         @Override
-        protected void dismissKeyguardOnNextActivity() {
-            getCallback().dismiss(false);
-        }
-
-        @Override
         Context getContext() {
             return mContext;
-        }
-    };
+        }};
 
     public KeyguardSelectorView(Context context) {
         this(context, null);
@@ -264,7 +258,9 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         LinearLayout glowPadContainer = (LinearLayout) findViewById(R.id.keyguard_glow_pad_container);
         glowPadContainer.bringToFront();
         final boolean isLandscape = res.getSystem().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-        if (glowPadContainer != null && isShortcuts() && isLandscape && !isEightTargets()) {
+        final boolean isLargeScreen = LockscreenTargetUtils.isScreenLarge(mContext);
+        if (glowPadContainer != null && isShortcuts() &&
+                isLandscape && !isLargeScreen && !isEightTargets()) {
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.WRAP_CONTENT,
                     FrameLayout.LayoutParams.WRAP_CONTENT,
@@ -394,8 +390,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                 || secureCameraDisabled;
         final KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(getContext());
         boolean disabledBySimState = monitor.isSimLocked();
-        boolean cameraPresent =
-                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
+        boolean cameraPresent = mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
         boolean searchTargetPresent =
                 isTargetPresent(com.android.internal.R.drawable.ic_action_assist_generic);
         mLongPress = false;
@@ -636,4 +631,3 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         }
     }
 }
-
