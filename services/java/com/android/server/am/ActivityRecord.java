@@ -43,7 +43,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TimeUtils;
-import android.view.ContextThemeWrapper; 
+import android.view.ContextThemeWrapper;
 import android.view.IApplicationToken;
 import android.view.WindowManager;
 
@@ -131,7 +131,7 @@ final class ActivityRecord {
 
     boolean topIntent;
     boolean newTask;
-    boolean floatingWindow; 
+    boolean floatingWindow;
 
     String stringName;      // for caching of toString().
     
@@ -404,7 +404,7 @@ final class ActivityRecord {
                         ? android.R.style.Theme
                         : android.R.style.Theme_Holo;
             }
-	    // This is where the package gets its first context from the attribute-cache
+	        // This is where the package gets its first context from the attribute-cache
             // In order to hook its attributes we set up our check for floating mutil windows here.
             topIntent = true;
 
@@ -437,7 +437,7 @@ final class ActivityRecord {
                 intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                
+
                 // If this is the mother-intent we make it volatile
                 if (topIntent) {
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
