@@ -16,7 +16,6 @@
 
 package com.android.server.power;
 
-import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.opengl.EGL14;
@@ -222,7 +221,6 @@ final class ElectronBeam {
         if (!attachEglContext()) {
             return false;
         }
-
         try {
             // Clear frame to solid black.
             GLES10.glClearColor(0f, 0f, 0f, 1f);
@@ -243,7 +241,6 @@ final class ElectronBeam {
                     drawVStretch(1.0f - ((level - HSTRETCH_DURATION) / VSTRETCH_DURATION));
                 }
             }
-
             if (checkGlErrors("drawFrame")) {
                 return false;
             }
