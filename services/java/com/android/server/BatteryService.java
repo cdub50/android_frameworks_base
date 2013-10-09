@@ -65,7 +65,7 @@ import java.util.Calendar;
  * <p>&quot;present&quot; - boolean, true if the battery is present<br />
  * <p>&quot;icon-small&quot; - int, suggested small icon to use for this state</p>
  * <p>&quot;plugged&quot; - int, 0 if the device is not plugged in; 1 if plugged
- * into an AC power adapter; 2 if plugged in via USB.</p>
+ * into an AC power adapter; 2 if plugged in via USB; 4 if plugged in via Wireless.</p>
  * <p>&quot;voltage&quot; - int, current battery voltage in millivolts</p>
  * <p>&quot;temperature&quot; - int, current battery temperature in tenths of
  * a degree Centigrade</p>
@@ -126,7 +126,6 @@ public final class BatteryService extends Binder {
     private int mLastBatteryVoltage;
     private int mLastBatteryTemperature;
     private boolean mLastBatteryLevelCritical;
-
     private int mInvalidCharger;
     private int mLastInvalidCharger;
 
@@ -214,6 +213,7 @@ public final class BatteryService extends Binder {
         if (mBatteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN) {
             return true;
         }
+        // mAcOnline is used for main ac and dock battery ac
         if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_AC) != 0 && mAcOnline) {
             return true;
         }
@@ -868,5 +868,4 @@ public final class BatteryService extends Binder {
         }
         return false;
     }
-
 }
