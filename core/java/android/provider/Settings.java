@@ -4068,6 +4068,11 @@ public final class Settings {
         public static final String LOCKSCREEN_MUSIC_CONTROLS = "lockscreen_music_controls";
 
         /**
+         * @hide
+         */
+        public static final String LOCKSCREEN_GLOW_TORCH = "lockscreen_glow_torch";
+
+        /**
          * Notifications Expand Behavior
          * @hide
          */
@@ -4428,16 +4433,6 @@ public final class Settings {
          * @hide
          */
         public static final String MISSED_CALL_BREATH = "missed_call_breath";
-
-        /**
-         * @hide
-         */
-        public static final String LOCKSCREEN_CUSTOM_TEXT_COLOR = "lockscreen_custom_text_color";
-
-        /**
-         * @hide
-         */
-        public static final String LOCKSCREEN_GLOW_TORCH = "lockscreen_glow_torch";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
